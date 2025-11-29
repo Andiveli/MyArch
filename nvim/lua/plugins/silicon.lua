@@ -1,0 +1,23 @@
+return {
+    -- "michaelrommel/silicon.nvim",
+    -- cmd = "Silicon",
+    -- config = function()
+    --     require("silicon").setup({
+    --         font = "JetBrainsMono Nerd Font=26", -- Correcto
+    --         background = "#87f",
+    --         theme = "Catppuccin-Mocha",
+    --         line_number = true,
+    --         pad_vert = 80,
+    --         pad_horiz = 50,
+    --         output = {
+    --             path = "/home/samael/Pictures/nvim_silicon",
+    --         },
+    --         watermark = {
+    --             text = " @eSeylaA69",
+    --         },
+    --         window_title = function()
+    --             return vim.fn.fnamemodify(vim.fn.bufname(vim.fn.bufnr()), ":~:.")
+    --         end,
+    --     })
+    -- end,
+}
