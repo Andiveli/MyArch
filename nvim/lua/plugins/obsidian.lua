@@ -13,13 +13,16 @@ return {
     opts = {
         workspaces = {
             {
-                name = "notaSamael", -- Name of the workspace
-                path = os.getenv("HOME") .. "/Escritorio/Programacion/", -- Path to the notes directory
+                name = "SamaelNotes", -- Name of the workspace
+                path = os.getenv("HOME") .. "/Notas", -- Path to the notes directory
             },
         },
         completition = {
             cmp = true,
         },
+        notes_subdir = "limbo", -- Subdirectory for notes
+        new_note_location = "limbo", -- Where to create new notes
+        attachments_subdir = "extras", -- Subdirectory for attachments
         picker = {
             -- Set your preferred picker. Can be one of 'telescope.nvim', 'fzf-lua', 'mini.pick' or 'snacks.pick'.
             name = "snacks.pick",

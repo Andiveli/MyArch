@@ -253,6 +253,7 @@ return {
             },
             dashboard = {
                 sections = {
+                    -- { section = "banner" },
                     { section = "header" },
                     { icon = " ", title = "Keymaps", section = "keys", indent = 2, padding = 1 },
                     -- { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
@@ -260,6 +261,27 @@ return {
                     { section = "startup" },
                 },
                 preset = {
+                    --                    banner = [[
+                    --                   -`
+                    --                  .o+`
+                    --                 `ooo/
+                    --                `+oooo:
+                    --               `+oooooo:
+                    --               -+oooooo+:
+                    --             `/:-:++oooo+:
+                    --            `/++++/+++++++:
+                    --           `/++++++++++++++:
+                    --          `/+++ooooooooooooo/`
+                    --         ./ooosssso++osssssso+`
+                    --        .oossssso-````/ossssss+`
+                    --       -osssssso.      :ssssssso.
+                    --      :osssssss/        osssso+++.
+                    --     /ossssssss/        +ssssooo/-
+                    --   `/ossssso+/:-        -:/+osssso+-
+                    --  `+sso+:-`                 `.-/+oso:
+                    -- `++:.                           `-/+/
+                    -- .`                                 `/
+                    --                    ]],
                     header = [[
     ███████╗ █████╗ ███╗   ███╗ █████╗ ███████╗██╗      
     ██╔════╝██╔══██╗████╗ ████║██╔══██╗██╔════╝██║      
@@ -270,19 +292,19 @@ return {
 
          ★  S A M A E L  ★       
       ]],
-          -- stylua: ignore
-          -- -@type snacks.dashboard.Item[]
-          keys = {
-            { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
-            { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
-            { icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
-            { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
-            { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
-            { icon = " ", key = "s", desc = "Restore Session", section = "session" },
-            { icon = " ", key = "x", desc = "Lazy Extras", action = ":LazyExtras" },
-            { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
-            { icon = " ", key = "q", desc = "Quit", action = ":qa" },
-          },
+                    -- stylua: ignore
+                    --- @type snacks.dashboard.Item[]
+                    keys = {
+                        { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+                        { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+                        { icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
+                        { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+                        { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+                        { icon = " ", key = "s", desc = "Restore Session", section = "session" },
+                        { icon = " ", key = "x", desc = "Lazy Extras", action = ":LazyExtras" },
+                        { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
+                        { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+                    },
                 },
             },
         },
