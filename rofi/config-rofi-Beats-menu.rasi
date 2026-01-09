@@ -1,0 +1,22 @@
+/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* Main config Rofi Beats Config (compact) */
+
+@import "~/.config/rofi/config.rasi"  
+
+/* ---- Entry ---- */ 
+entry {
+  width: 20%;
+  placeholder: "📻 Choose Music Source";
+}
+
+/* ---- Window ---- */
+window {
+  width: 24%;
+}
+
+/* ---- Listview ---- */
+listview {
+  fixed-columns: false;
+  colums: 1;
+  lines: 3;
+}

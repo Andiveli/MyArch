@@ -1,0 +1,28 @@
+[global]
+    timeout = 2000
+    corner_radius = 10
+    geometry = "300x50+0+30"  
+    origin = "top-center"        
+    font = Monospace 10
+    transparency = 10
+    padding = 8
+    frame_width = 1
+    separator_height = 2
+    idle_timeout = 0
+    shadow = true;
+    shadow-radius = 10;  # Opcional para suavizar las sombras y combinar con las esquinas redondeadas
+
+
+
+[frame]
+    width = 1
+    color = "#bd93f9"  # Púrpura estilo Dracula
+
+[notifications]
+    background = "#282a36"  # Fondo oscuro
+    foreground = "#50fa7b"  # Texto claro
+    timeout = 2000  # Duración de las notificaciones (milisegundos)
+
+[shortcuts]
+    close = ctrl+space
+    close_all = ctrl+shift+space
