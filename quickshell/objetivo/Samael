@@ -1,0 +1,51 @@
+
+{
+"include": [
+  "$HOME/.config/quickshell/objetivo/Modules",
+  "$HOME/.config/quickshell/objetivo/ModulesWorkspaces",
+  "$HOME/.config/quickshell/objetivo/ModulesCustom",
+  "$HOME/.config/quickshell/objetivo/ModulesGroups"
+  ],
+"layer": "top",
+"exclusive": true,
+"passthrough": false,
+"position": "top",
+"spacing": 3,
+"fixed-center": true,
+"ipc": true,
+"margin-top": 3,
+"margin-left": 8,
+"margin-right": 8,
+
+"modules-left": [
+	"group/app_drawer",
+	"custom/separator#dot-line",
+    "group/motherboard",
+	"custom/separator#blank",
+	// "group/laptop",
+	"custom/separator#line",
+	"custom/weather"
+	],
+
+"modules-center": [
+	"custom/swaync",
+	"custom/cava_mviz",
+	"custom/separator#dot-line",
+	"clock",
+	"custom/separator#line",
+	"hyprland/workspaces#kanji",
+	"custom/separator#dot-line",
+	"idle_inhibitor"
+	], 
+
+"modules-right": [
+	"network#speed",
+	"group/connections",
+	"custom/separator#line",
+	"tray",
+	"mpris", 
+	"group/audio",
+	"custom/separator#dot-line",
+	"group/status"
+	]
+}

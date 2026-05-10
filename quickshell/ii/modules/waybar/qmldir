@@ -1,0 +1,35 @@
+# Quickshell Waybar-style Modules
+
+# Main bar
+Bar 1.0 Bar.qml
+WaybarContent 1.0 WaybarContent.qml
+
+# App launchers
+AppLauncher 1.0 app/AppLauncher.qml
+AppLauncherButton 1.0 app/AppLauncherButton.qml
+WeatherWidget 1.0 app/WeatherWidget.qml
+ClockWidget 1.0 app/ClockWidget.qml
+Separator 1.0 app/Separator.qml
+
+# Resources
+SystemResources 1.0 resources/SystemResources.qml
+ResourceItem 1.0 resources/ResourceItem.qml
+
+# Network
+NetworkIndicator 1.0 network/NetworkIndicator.qml
+
+# Audio
+AudioIndicator 1.0 audio/AudioIndicator.qml
+
+# Status
+StatusButtons 1.0 status/StatusButtons.qml
+
+# Workspaces
+WorkspacesKanji 1.0 workspaces/WorkspacesKanji.qml
+IdleInhibitor 1.0 workspaces/IdleInhibitor.qml
+
+# Visualizer
+CavaVisualizer 1.0 visualizer/CavaVisualizer.qml
+
+# Notifications
+NotificationsIndicator 1.0 notifications/NotificationsIndicator.qml
