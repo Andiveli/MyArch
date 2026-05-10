@@ -13,6 +13,16 @@ vim.keymap.set({ "i", "n", "v" }, "<C-c>", [[<C-\><C-n>]])
 -- Screen Keys
 vim.keymap.set({ "n" }, "<leader>uk", "<cmd>Screenkey<CR>")
 
+--- OBSIDIAN ---
+vim.keymap.set("n", "<leader>oc", "<cmd>Obsidian check<CR>", { desc = "Obsidian Check Checkbox" })
+vim.keymap.set("n", "<leader>ot", "<cmd>Obsidian template<CR>", { desc = "Insert Obsidian Template" })
+vim.keymap.set("n", "<leader>oo", "<cmd>Obsidian open<CR>", { desc = "Open in Obsidian App" })
+vim.keymap.set("n", "<leader>ob", "<cmd>Obsidian backlinks<CR>", { desc = "Show Obsidian Backlinks" })
+vim.keymap.set("n", "<leader>ol", "<cmd>Obsidian links<CR>", { desc = "Show Obsidian Links" })
+vim.keymap.set("n", "<leader>on", "<cmd>Obsidian new<CR>", { desc = "Create New Note" })
+vim.keymap.set("n", "<leader>os", "<cmd>Obsidian search<CR>", { desc = "Search Obsidian" })
+vim.keymap.set("n", "<leader>oq", "<cmd>Obsidian quick-switch<CR>", { desc = "Quick Switch" })
+
 local placas = {
     "uno",
     "megaatmega2560",
@@ -23,7 +33,7 @@ local placas = {
     "pro16MHzatmega328",
     "nanoatmega328",
 }
--- Keysmaps for platformio en nvim jsjsjsjs
+-- Keysmaps for platformio en nvim
 vim.keymap.set("n", "<leader>ri", function()
     vim.ui.input({ prompt = "PlatformIO Project Name: " }, function(project_name)
         if project_name == nil or project_name == "" then
@@ -46,7 +56,7 @@ vim.keymap.set("n", "<leader>ri", function()
     end)
 end)
 vim.keymap.set("n", "<leader>rb", "<cmd>term pio run<cr>", { desc = "PlatformIO Build" })
-vim.keymap.set("n", "<leader>ru", "<cmd>term run -t upload<cr>", { desc = "PlatformIO Upload" })
+vim.keymap.set("n", "<leader>ru", "<cmd>term pio run -t upload<cr>", { desc = "PlatformIO Upload" })
 vim.keymap.set("n", "<leader>rm", "<cmd>term pio device monitor<cr>", { desc = "PlatformIO Monitor" })
 --
 ----- Tmux Navigation ------
@@ -58,16 +68,6 @@ vim.keymap.set("n", "<C-k>", nvim_tmux_nav.NvimTmuxNavigateUp) -- Navigate to th
 vim.keymap.set("n", "<C-l>", nvim_tmux_nav.NvimTmuxNavigateRight) -- Navigate to the right pane
 vim.keymap.set("n", "<C-\\>", nvim_tmux_nav.NvimTmuxNavigateLastActive) -- Navigate to the last active pane
 vim.keymap.set("n", "<C-Space>", nvim_tmux_nav.NvimTmuxNavigateNext) -- Navigate to the next pane
-
------ OBSIDIAN -----
-vim.keymap.set("n", "<leader>oc", "<cmd>ObsidianCheck<CR>", { desc = "Obsidian Check Checkbox" })
-vim.keymap.set("n", "<leader>ot", "<cmd>ObsidianTemplate<CR>", { desc = "Insert Obsidian Template" })
-vim.keymap.set("n", "<leader>oo", "<cmd>Obsidian Open<CR>", { desc = "Open in Obsidian App" })
-vim.keymap.set("n", "<leader>ob", "<cmd>ObsidianBacklinks<CR>", { desc = "Show ObsidianBacklinks" })
-vim.keymap.set("n", "<leader>ol", "<cmd>ObsidianLinks<CR>", { desc = "Show ObsidianLinks" })
-vim.keymap.set("n", "<leader>on", "<cmd>ObsidianNew<CR>", { desc = "Create New Note" })
-vim.keymap.set("n", "<leader>os", "<cmd>ObsidianSearch<CR>", { desc = "Search Obsidian" })
-vim.keymap.set("n", "<leader>oq", "<cmd>ObsidianQuickSwitch<CR>", { desc = "Quick Switch" })
 
 ----- OIL -----
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
