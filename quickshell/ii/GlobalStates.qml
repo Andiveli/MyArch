@@ -24,10 +24,42 @@ Singleton {
     property bool screenLocked: false
     property bool screenLockContainsCharacters: false
     property bool screenUnlockFailed: false
+    property bool screenTranslatorOpen: false
     property bool sessionOpen: false
     property bool superDown: false
     property bool superReleaseMightTrigger: true
     property bool wallpaperSelectorOpen: false
+    property bool samaelWifiMenuOpen: false
+    property bool samaelBluetoothMenuOpen: false
+    property bool samaelNotificationsMenuOpen: false
+    property bool samaelSystemSidebarOpen: false
+    property bool samaelSuperMenuOpen: false
+    // Screen coords for notification island (updated by focused monitor bar)
+    property bool samaelIslandAnchorValid: false
+    property string samaelIslandScreenName: ""
+    property real samaelIslandTop: 0
+    property real samaelIslandLeft: 0
+    property real samaelIslandWidth: 0
+    property int samaelIslandPulse: 0
+    // Clock calendar drop (bar publishes anchor under clock)
+    property bool samaelClockDropOpen: false
+    property bool samaelClockAnchorValid: false
+    property string samaelClockScreenName: ""
+    property real samaelClockDropTop: 0
+    property real samaelClockDropLeft: 0
+    property real samaelClockDropCenterX: 0
+    property real samaelClockDropWidth: 0
+    // Media manager drop (bar MediaWidget publishes anchor + dock seam)
+    property string samaelMediaScreenName: ""
+    property real samaelMediaCenterX: 0
+    property real samaelMediaDockTop: 0
+    property real samaelMediaDockLeft: 0
+    property real samaelMediaDockWidth: 0
+    /** 0 = docked flush to bar; 1 = panel tucked under bar (Caelestia-style attach anim) */
+    property real samaelMediaAttach: 1.0
+    // Bar vim navigation (h/l stops, j/k contextual)
+    property bool samaelBarNavActive: false
+    property int samaelBarFocus: 0 // 0 drawer .. 7 session
     property bool workspaceShowNumbers: false
 
     onSidebarRightOpenChanged: {
@@ -35,14 +67,6 @@ Singleton {
             Notifications.timeoutAll();
             Notifications.markAllRead();
         }
-    }
-
-    property real screenZoom: 1
-    onScreenZoomChanged: {
-        Quickshell.execDetached(["hyprctl", "keyword", "cursor:zoom_factor", root.screenZoom.toString()]);
-    }
-    Behavior on screenZoom {
-        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
     }
 
     GlobalShortcut {
@@ -56,16 +80,4 @@ Singleton {
             root.superDown = false
         }
     }
-
-    IpcHandler {
-		target: "zoom"
-
-		function zoomIn() {
-            screenZoom = Math.min(screenZoom + 0.4, 3.0)
-        }
-
-        function zoomOut() {
-            screenZoom = Math.max(screenZoom - 0.4, 1)
-        } 
-	}
 }

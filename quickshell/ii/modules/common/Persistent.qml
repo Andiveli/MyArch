@@ -145,6 +145,11 @@ Singleton {
                 }
             }
 
+            property JsonObject samaelMedia: JsonObject {
+                /** Mpris uniqueId or dbusName for manual player pick in media panel */
+                property string selectedPlayerKey: ""
+            }
+
             property JsonObject timer: JsonObject {
                 property JsonObject pomodoro: JsonObject {
                     property bool running: false
