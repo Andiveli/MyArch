@@ -6,7 +6,7 @@ Personal [Quickshell](https://quickshell.org/) layouts under `~/.config/quickshe
 
 **Run:** `qs -c samael`
 
-Hybrid shell: **ii / Samael bar** (super menu, sidebar, media & performance drops, Wallust) + **Caelestia** pieces vendored in-tree (lock, launcher/drawers, dashboard performance cards). Does **not** require sibling configs `quickshell/ii` or `quickshell/caelestia` at runtime.
+Hybrid shell: **ii-derived Samael bar** (super menu, sidebar, media & performance drops, Wallust) + **Caelestia** vendored under `samael/vendor/` (lock, launcher/drawers, performance cards). Legacy trees `quickshell/ii` and `quickshell/caelestia` were removed from this repo.
 
 | Doc | Path |
 | ----- | ------ |
@@ -32,13 +32,12 @@ qs -c samael &
 
 Hypr autostart should launch **`qs -c samael`** (see `hypr/hyprland/execs.lua` in dotfiles). Lock: `Ctrl+Alt+L` → `samael:lock`. Launcher: **Super** → `samael:launcher`.
 
-### Other trees (reference / legacy)
+### Other paths
 
-| Directory | Role |
-| ----------- | ------ |
-| `ii/` | Upstream-style ii shell; Samael UI was forked from here into `samael/`. |
-| `caelestia/` | Standalone Caelestia config (optional); **not** used when `qs -c samael` is the session shell. |
+| Path | Role |
+|------|------|
 | `openspec/` | Spec-driven change notes for the samael fork. |
+| `samael/modules/ii/` | Background/widgets copied inside samael (not a separate `qs -c ii` config). |
 
 ## Portability
 
