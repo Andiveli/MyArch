@@ -24,7 +24,7 @@
           "showBattery": true
         }
       },
-  "launcher": { "enabled": true, "showOnHover": false },
+  "launcher": { "enabled": false, "showOnHover": false },
   "lock": {
     "enabled": true,
     "recolourLogo": true,

@@ -3,3 +3,6 @@ vendor/caelestia-shell/build/
 
 # Quickshell runtime scratch
 undefined/
+
+# Built locally (see modules/launcher/README.md)
+modules/launcher/bin/yt-search

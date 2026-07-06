@@ -63,13 +63,11 @@ Scope {
     CustomShortcut {
         // qmllint enable unresolved-type
         name: "launcher"
-        description: "Toggle launcher"
+        description: "Toggle notlight launcher"
         onPressed: root.launcherInterrupted = false
         onReleased: {
-            if (!root.launcherInterrupted && !root.hasFullscreen) {
-                const screenState = ShellState.forActive();
-                screenState.launcher = !screenState.launcher;
-            }
+            if (!root.launcherInterrupted && !root.hasFullscreen)
+                Quickshell.execDetached(["qs", "-c", "samael", "ipc", "call", "spotlight", "toggle"]);
             root.launcherInterrupted = false;
         }
     }
@@ -110,6 +108,12 @@ Scope {
 
     IpcHandler {
         function toggle(drawer: string): void {
+            if (drawer === "launcher") {
+                if (root.hasFullscreen)
+                    return;
+                Quickshell.execDetached(["qs", "-c", "samael", "ipc", "call", "spotlight", "toggle"]);
+                return;
+            }
             if (list().split("\n").includes(drawer)) {
                 if (root.hasFullscreen && ["launcher", "session", "dashboard"].includes(drawer))
                     return;

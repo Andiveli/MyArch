@@ -7,10 +7,11 @@ Production shell for this dotfiles setup. Parent overview: [`../README.md`](../R
 | Layer | Source | In session |
 | ------- | -------- | ------------ |
 | Bar, super menu, drops (media + performance), Wallust | ii-derived `modules/samael/` | On |
-| Lock, idle, launcher/drawers | Vendored Caelestia `modules/` | On (Caelestia bar/dashboard chrome off) |
+| Lock, idle, drawers (chrome off) | Vendored Caelestia `modules/` | On |
+| App launcher (**notlight**) | `modules/launcher/` (not Caelestia) | On |
 | `Caelestia.Config` / wavy UI | `vendor/caelestia-shell` + CMake plugin → `~/.local` | Required |
 
-**Keybinds (Hypr):** Super → launcher · Ctrl+Alt+L → lock · Super+Shift+O → performance drop · globals `samael:*` and `quickshell:samael*` (see below).
+**Keybinds (Hypr):** Super (release) → **notlight** · Ctrl+Alt+L → lock · Super+Shift+O → performance drop · globals `samael:*` and `quickshell:samael*` (see below).
 
 ## Vendor
 
@@ -54,7 +55,7 @@ Quickshell resolves `import Caelestia.Config` from the user QML import path afte
 
 `Caelestia.Config` reads **`~/.config/caelestia/shell.json`** (not under `samael/`). For slice 1, copy or merge defaults from `samael/config/shell.json` into that path before running a full Caelestia shell entry.
 
-Samael-specific defaults in-repo: `config/shell.json` — background on, Caelestia bar/launcher/dashboard/session/sidebar off, lock on, `smartScheme: false` (Wallust colours via `qs.services` `Colours`).
+Samael-specific defaults in-repo: `config/shell.json` — background on, Caelestia bar/**drawer launcher**/dashboard/session/sidebar off, lock on, `smartScheme: false` (Wallust colours via `qs.services` `Colours`). App search uses **notlight** (`NotlightLauncher` in `shell.qml`), not `vendor/.../modules/launcher`.
 
 ### Dry import check (slice 2+)
 
@@ -77,21 +78,19 @@ No `caelestia-cli` — use Quickshell IPC directly.
 - `isLocked` — returns lock state
 - Hypr / hypridle example: `qs -c samael ipc call lock lock`
 
-**Drawers / launcher** (`target: drawers`)
+**Notlight launcher** (`target: spotlight` — see `modules/launcher/README.md`)
 
-- `toggle <drawer>` — flip a drawer flag on the active screen (e.g. `launcher`, `session`, `dashboard`, `sidebar`, `osd`, `utilities`)
-- `list` — newline-separated boolean drawer keys for the active screen
-- `isOpen <drawer>` — `1`, `0`, or `unknown`
-
-Examples:
+- `toggle` / `show` / `hide` — show or hide the panel
+- `themeMacos` / `themeWin95` — built-in themes; or `/theme macos` in the search bar
+- Data: `~/.config/quickshell/spotlight-data/`
 
 ```sh
-qs -c samael ipc call drawers toggle launcher
-qs -c samael ipc call drawers list
-qs -c samael ipc call drawers isOpen launcher
+qs -c samael ipc call spotlight toggle
 ```
 
-Ensure `~/.config/caelestia/shell.json` has `"launcher": { "enabled": true }` (see `samael/config/shell.json` for defaults). Caelestia bar/dashboard remain off; launcher UI is provided by the vendored drawers stack.
+Hypr: Super alone → `samael:launcher` (release) runs the same IPC. Caelestia drawer launcher is **disabled** (`launcher.enabled: false`, stub in `modules/drawers/Panels.qml`).
+
+**Drawers IPC** (`target: drawers`) — other Caelestia panels only; `toggle launcher` also routes to notlight via `Shortcuts.qml`, not `ShellState.launcher`.
 
 ### Hyprland global shortcuts
 
@@ -99,7 +98,7 @@ Lock/launcher `CustomShortcut` entries register as **`samael:<name>`** (`compone
 
 Hypr example (`~/.config/hypr/hyprland/keybinds.lua`):
 
-- **Launcher:** `SUPER` alone → `hl.dsp.global("samael:launcher")` with `release = true`.
+- **Launcher (notlight):** `SUPER` alone → `hl.dsp.global("samael:launcher")` with `release = true`.
 - **Lock:** `CTRL + ALT + L` → `hl.dsp.global("samael:lock")` (not `LockScreen.sh`).
 
 Samael bar features use **`quickshell:samael…`** globals (different registration path in `SamaelBar.qml`).

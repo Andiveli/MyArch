@@ -6,6 +6,7 @@
 import "modules"
 import "modules/common"
 import "modules/drawers"
+import "modules/launcher"
 import "modules/lock"
 import "services"
 import "panelFamilies"
@@ -30,6 +31,8 @@ ShellRoot {
     GSFLoader {}
 
     Drawers {}
+
+    NotlightLauncher {}
 
     Lock {
         id: lock
