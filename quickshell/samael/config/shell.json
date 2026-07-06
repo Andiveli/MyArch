@@ -1,0 +1,47 @@
+{
+  "background": {
+    "enabled": true,
+    "wallpaperEnabled": true,
+    "desktopClock": { "enabled": false },
+    "visualiser": { "enabled": false }
+  },
+  "bar": {
+    "persistent": false,
+    "showOnHover": false,
+    "entries": []
+  },
+  "border": { "thickness": 0, "rounding": 0, "smoothing": 0, "minThickness": 0 },
+      "dashboard": {
+        "enabled": false,
+        "showOnHover": false,
+        "showPerformance": true,
+        "performance": {
+          "showCpu": true,
+          "showGpu": true,
+          "showMemory": true,
+          "showStorage": true,
+          "showNetwork": true,
+          "showBattery": true
+        }
+      },
+  "launcher": { "enabled": true, "showOnHover": false },
+  "lock": {
+    "enabled": true,
+    "recolourLogo": true,
+    "enableFprint": true,
+    "maxFprintTries": 3,
+    "enableHowdy": true,
+    "maxHowdyTries": 3,
+    "triggerHowdyOnWake": true,
+    "hideNotifs": false
+  },
+  "session": { "enabled": false },
+  "sidebar": { "enabled": false, "showOnHover": false },
+  "nexus": { "enabled": false },
+  "utilities": { "enabled": false },
+  "osd": { "enabled": false },
+  "appearance": {
+    "transparency": { "enabled": false, "base": 1, "layers": 0.4 }
+  },
+  "services": { "smartScheme": false }
+}

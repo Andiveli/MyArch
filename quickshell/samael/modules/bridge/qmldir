@@ -1,0 +1,3 @@
+module qs.modules.bridge
+singleton WallustColoursBridge 1.0 WallustColoursBridge.qml
+singleton SamaelLockColors 1.0 SamaelLockColors.qml

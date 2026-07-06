@@ -1,0 +1,1 @@
+../vendor/caelestia-shell/modules/Shortcuts.qml

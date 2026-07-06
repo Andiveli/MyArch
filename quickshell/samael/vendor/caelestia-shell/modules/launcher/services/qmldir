@@ -1,0 +1,6 @@
+module qs.modules.launcher.services
+singleton Apps 1.0 Apps.qml
+singleton Actions 1.0 Actions.qml
+singleton Schemes 1.0 Schemes.qml
+singleton M3Variants 1.0 M3Variants.qml
+singleton LauncherIcons 1.0 LauncherIcons.qml

@@ -1,0 +1,1 @@
+../vendor/caelestia-shell/services/ShellState.qml

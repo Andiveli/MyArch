@@ -1,0 +1,8 @@
+module qs.utils
+singleton Strings 1.0 Strings.qml
+singleton Icons 1.0 Icons.qml
+singleton Paths 1.0 Paths.qml
+Images 1.0 Images.qml
+NetworkConnection 1.0 NetworkConnection.qml
+Searcher 1.0 Searcher.qml
+singleton SysInfo 1.0 SysInfo.qml

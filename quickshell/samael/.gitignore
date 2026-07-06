@@ -1,0 +1,5 @@
+# CMake/Ninja output — rebuild per machine (see README)
+vendor/caelestia-shell/build/
+
+# Quickshell runtime scratch
+undefined/

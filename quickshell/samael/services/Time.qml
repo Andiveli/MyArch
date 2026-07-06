@@ -1,0 +1,1 @@
+../vendor/caelestia-shell/services/Time.qml
