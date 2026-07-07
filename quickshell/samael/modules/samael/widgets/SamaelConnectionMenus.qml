@@ -41,18 +41,28 @@ Scope {
         }
     }
 
+    // Gate old PanelWindows when center dock handles the surface.
     Loader {
         active: GlobalStates.samaelWifiMenuOpen
+&& (!SamaelCenterSurface.effectiveSurface
+|| SamaelCenterSurface.effectiveSurface === "idle"
+|| SamaelCenterSurface.effectiveSurface !== "wifi")
         sourceComponent: wifiPanel
     }
 
     Loader {
         active: GlobalStates.samaelBluetoothMenuOpen
+&& (!SamaelCenterSurface.effectiveSurface
+|| SamaelCenterSurface.effectiveSurface === "idle"
+|| SamaelCenterSurface.effectiveSurface !== "bluetooth")
         sourceComponent: btPanel
     }
 
     Loader {
         active: GlobalStates.samaelNotificationsMenuOpen
+&& (!SamaelCenterSurface.effectiveSurface
+|| SamaelCenterSurface.effectiveSurface === "idle"
+|| SamaelCenterSurface.effectiveSurface !== "notificationsMenu")
         sourceComponent: notifPanel
     }
 
