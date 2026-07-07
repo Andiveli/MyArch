@@ -35,7 +35,11 @@ Scope {
     }
 
     Loader {
+        // When SamaelCenterSurface is active, the center dock's ldWallpaper
+        // handles rendering — disable the old PanelWindow to avoid duplicates.
         active: GlobalStates.wallpaperSelectorOpen
+&& (!SamaelCenterSurface.effectiveSurface
+|| SamaelCenterSurface.effectiveSurface === "idle")
 
         sourceComponent: PanelWindow {
             id: panelWindow

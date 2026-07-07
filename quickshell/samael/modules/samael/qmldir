@@ -20,6 +20,9 @@ SamaelPillSurface 1.0 widgets/SamaelPillSurface.qml
 SamaelCalendarSurface 1.0 widgets/SamaelCalendarSurface.qml
 SamaelNotificationsMenuSurface 1.0 widgets/SamaelNotificationsMenuSurface.qml
 SamaelWifiSurface 1.0 widgets/SamaelWifiSurface.qml
+SamaelBluetoothSurface 1.0 widgets/SamaelBluetoothSurface.qml
+SamaelScreenRecorderSurface 1.0 widgets/SamaelScreenRecorderSurface.qml
+SamaelWallpaperSurface 1.0 widgets/SamaelWallpaperSurface.qml
 SamaelBarNav 1.0 widgets/SamaelBarNav.qml
 SamaelNotificationIsland 1.0 widgets/SamaelNotificationIsland.qml
 SamaelClockCalendarDrop 1.0 widgets/SamaelClockCalendarDrop.qml

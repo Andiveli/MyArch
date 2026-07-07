@@ -371,23 +371,9 @@ Item {
                     active: GlobalStates.samaelBluetoothMenuOpen
                     asynchronous: true
                     z: 4
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#3498DB"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Bluetooth"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
+                    sourceComponent: SamaelBluetoothSurface {
+                        open: true
+                        morphCloseness: centerDock.morphCloseness
                     }
                 }
 
@@ -397,23 +383,9 @@ Item {
                     active: GlobalStates.samaelRecorderOpen
                     asynchronous: true
                     z: 5
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#E74C3C"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Screen Recorder"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
+                    sourceComponent: SamaelScreenRecorderSurface {
+                        open: true
+                        morphCloseness: centerDock.morphCloseness
                     }
                 }
 
@@ -423,23 +395,9 @@ Item {
                     active: GlobalStates.wallpaperSelectorOpen
                     asynchronous: true
                     z: 6
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#9B59B6"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Wallpaper"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
+                    sourceComponent: SamaelWallpaperSurface {
+                        open: true
+                        morphCloseness: centerDock.morphCloseness
                     }
                 }
 
