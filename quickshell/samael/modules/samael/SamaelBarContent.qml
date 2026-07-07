@@ -226,6 +226,7 @@ Item {
         clip: true
 
         Behavior on width {
+            enabled: centerDock.dockExpanded
             NumberAnimation {
                 duration: Pill.Motion.morph
                 easing.type: Pill.Motion.easeMorph
@@ -234,6 +235,7 @@ Item {
         }
 
         Behavior on height {
+            enabled: centerDock.dockExpanded
             NumberAnimation {
                 duration: Pill.Motion.morph
                 easing.type: Pill.Motion.easeMorph
@@ -274,9 +276,11 @@ Item {
             id: idleModules
             width: parent.width
             height: parent.height
-            opacity: SamaelCenterSurface.effectiveSurface === "idle" ? 1 : 0
-
-            Behavior on opacity { NumberAnimation { duration: Pill.Motion.standard } }
+                opacity: SamaelCenterSurface.effectiveSurface === "idle" ? 1 : 0
+                Behavior on opacity {
+                    enabled: SamaelCenterSurface.effectiveSurface !== "idle"
+                    NumberAnimation { duration: Pill.Motion.standard }
+                }
 
             Item {
                 width: parent.width
@@ -308,9 +312,11 @@ Item {
             id: surfaceStack
             width: parent.width
             height: parent.height
-            opacity: SamaelCenterSurface.effectiveSurface !== "idle" ? 1 : 0
-
-            Behavior on opacity { NumberAnimation { duration: Pill.Motion.standard } }
+                opacity: SamaelCenterSurface.effectiveSurface !== "idle" ? 1 : 0
+                Behavior on opacity {
+                    enabled: SamaelCenterSurface.effectiveSurface !== "idle"
+                    NumberAnimation { duration: Pill.Motion.standard }
+                }
 
                 Loader {
                     id: ldPopupIsland
