@@ -18,7 +18,7 @@ Item {
     property real cachedCenterBarW: 0
 
     // ── Test hooks (refs for structural testing) ──
-    property alias idleModulesRef: idleModules
+    property alias centerDockModulesRef: centerDockModules
     property alias surfaceStackRef: surfaceStack
     property alias centerModulesRef: centerModules
     property alias ldCalendarRef: ldCalendar
@@ -271,39 +271,28 @@ Item {
             bottomRightRadius: 0
         }
 
-        // ── Idle modules (visible when no surface is open) ──
+        // ── Center modules (always visible — no opacity dependency on effectiveSurface) ──
         Item {
-            id: idleModules
+            id: centerDockModules
             width: parent.width
             height: parent.height
-                opacity: SamaelCenterSurface.effectiveSurface === "idle" ? 1 : 0
-                Behavior on opacity {
-                    enabled: SamaelCenterSurface.effectiveSurface !== "idle"
-                    NumberAnimation { duration: Pill.Motion.standard }
-                }
 
-            Item {
-                width: parent.width
-                height: centerModules.implicitHeight
-                anchors.verticalCenter: parent.verticalCenter
+            SamaelModuleGroup {
+                id: centerModules
+                chromeless: centerDock.dockExpanded
+                layoutExpand: clockModule.expanded ? 1 : 0
+                width: centerDock.dockExpanded ? parent.width : implicitWidth
+                x: centerDock.dockExpanded ? 0 : (parent.width - width) / 2
+                y: (parent.height - height) / 2
 
-                    SamaelModuleGroup {
-                        id: centerModules
-                        chromeless: centerDock.dockExpanded
-                        layoutExpand: clockModule.expanded ? 1 : 0
-                        width: centerDock.dockExpanded ? parent.width : implicitWidth
-                        x: centerDock.dockExpanded ? 0 : (parent.width - width) / 2
-                        y: 0
-
-                        NotificationIndicator {}
-                        CavaVisualizer {}
-                        Separator { variant: "dot-line" }
-                        ClockWidget { id: clockModule }
-                        Separator { variant: "line" }
-                        KanjiWorkspaces {}
-                        Separator { variant: "dot-line" }
-                        IdleInhibitor {}
-                    }
+                NotificationIndicator {}
+                CavaVisualizer {}
+                Separator { variant: "dot-line" }
+                ClockWidget { id: clockModule }
+                Separator { variant: "line" }
+                KanjiWorkspaces {}
+                Separator { variant: "dot-line" }
+                IdleInhibitor {}
             }
         }
 
@@ -312,11 +301,7 @@ Item {
             id: surfaceStack
             width: parent.width
             height: parent.height
-                opacity: SamaelCenterSurface.effectiveSurface !== "idle" ? 1 : 0
-                Behavior on opacity {
-                    enabled: SamaelCenterSurface.effectiveSurface !== "idle"
-                    NumberAnimation { duration: Pill.Motion.standard }
-                }
+            visible: centerDock.dockExpanded
 
                 Loader {
                     id: ldPopupIsland
