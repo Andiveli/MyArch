@@ -15,6 +15,7 @@ Separator 1.0 Separator.qml
 SamaelWallpaperPicker 1.0 SamaelWallpaperPicker.qml
 SamaelWallpaperPickerContent 1.0 SamaelWallpaperPickerContent.qml
 SamaelConnectionMenus 1.0 widgets/SamaelConnectionMenus.qml
+SamaelPillSurface 1.0 widgets/SamaelPillSurface.qml
 SamaelBarNav 1.0 widgets/SamaelBarNav.qml
 SamaelNotificationIsland 1.0 widgets/SamaelNotificationIsland.qml
 SamaelClockCalendarDrop 1.0 widgets/SamaelClockCalendarDrop.qml
