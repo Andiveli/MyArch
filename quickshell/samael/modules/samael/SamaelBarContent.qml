@@ -254,12 +254,21 @@ Item {
             bottomRightRadius: 0
         }
 
+        // ── Idle modules (visible when no surface is open) ──
         Item {
+            id: idleModules
             width: parent.width
-            height: centerModules.implicitHeight
-            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height
+            opacity: SamaelCenterSurface.effectiveSurface === "idle" ? 1 : 0
 
-            SamaelModuleGroup {
+            Behavior on opacity { NumberAnimation { duration: Pill.Motion.standard } }
+
+            Item {
+                width: parent.width
+                height: centerModules.implicitHeight
+                anchors.verticalCenter: parent.verticalCenter
+
+                SamaelModuleGroup {
                 id: centerModules
                 chromeless: centerDock.dockExpanded
                 layoutExpand: clockModule.expanded ? 1 : 0
@@ -275,7 +284,29 @@ Item {
                 KanjiWorkspaces {}
                 Separator { variant: "dot-line" }
                 IdleInhibitor {}
+                }
             }
+        }
+
+        // ── Surface stack (visible when a surface is open) ──
+        Item {
+            id: surfaceStack
+            width: parent.width
+            height: parent.height
+            opacity: SamaelCenterSurface.effectiveSurface !== "idle" ? 1 : 0
+
+            Behavior on opacity { NumberAnimation { duration: Pill.Motion.standard } }
+
+            Loader { id: ldWallpaper;        active: GlobalStates.wallpaperSelectorOpen;          asynchronous: true; z: 6; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e2e3e"; Text { anchors.centerIn: parent; text: "Wallpaper" } } }
+            Loader { id: ldPower;             active: GlobalStates.sessionOpen;                    asynchronous: true; z: 7; anchors.fill: parent; sourceComponent: Rectangle { color: "#3e2e2e"; Text { anchors.centerIn: parent; text: "Power" } } }
+            Loader { id: ldNotificationsMenu; active: GlobalStates.samaelNotificationsMenuOpen;    asynchronous: true; z: 2; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e3e2e"; Text { anchors.centerIn: parent; text: "Notifications" } } }
+            Loader { id: ldMedia;             active: GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing;     asynchronous: true; z: 8; anchors.fill: parent; sourceComponent: Rectangle { color: "#3e3e2e"; Text { anchors.centerIn: parent; text: "Media" } } }
+            Loader { id: ldPerformance;       active: GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing;  asynchronous: true; z: 9; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e3e3e"; Text { anchors.centerIn: parent; text: "Performance" } } }
+            Loader { id: ldWifi;              active: GlobalStates.samaelWifiMenuOpen;              asynchronous: true; z: 3; anchors.fill: parent; sourceComponent: Rectangle { color: "#3e2e3e"; Text { anchors.centerIn: parent; text: "Wi-Fi" } } }
+            Loader { id: ldBluetooth;         active: GlobalStates.samaelBluetoothMenuOpen;          asynchronous: true; z: 4; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e3e3e"; Text { anchors.centerIn: parent; text: "Bluetooth" } } }
+            Loader { id: ldCalendar;          active: GlobalStates.samaelClockDropOpen;              asynchronous: true; z: 1; anchors.fill: parent; sourceComponent: Rectangle { color: "#3e3e3e"; Text { anchors.centerIn: parent; text: "Calendar" } } }
+            Loader { id: ldScreenRecorder;    active: GlobalStates.samaelRecorderOpen;              asynchronous: true; z: 5; anchors.fill: parent; sourceComponent: Rectangle { color: "#4e2e2e"; Text { anchors.centerIn: parent; text: "Screen Recorder" } } }
+            Loader { id: ldPopupIsland;       active: Notifications.popupList.length > 0 && !GlobalStates.screenLocked;  asynchronous: true; z: 0; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e4e2e"; Text { anchors.centerIn: parent; text: "Popup Island" } } }
         }
     }
 
