@@ -4,6 +4,7 @@ singleton SamaelStyle 1.0 SamaelStyle.qml
 singleton SamaelNotificationFormat 1.0 SamaelNotificationFormat.qml
 singleton SamaelPlayers 1.0 SamaelPlayers.qml
 singleton SamaelBarNavHub 1.0 SamaelBarNavHub.qml
+singleton SamaelCenterSurface 1.0 SamaelCenterSurface.qml
 singleton SamaelSessionHub 1.0 SamaelSessionHub.qml
 singleton CavaService 1.0 widgets/CavaService.qml
 SamaelBar 1.0 SamaelBar.qml
@@ -16,6 +17,9 @@ SamaelWallpaperPicker 1.0 SamaelWallpaperPicker.qml
 SamaelWallpaperPickerContent 1.0 SamaelWallpaperPickerContent.qml
 SamaelConnectionMenus 1.0 widgets/SamaelConnectionMenus.qml
 SamaelPillSurface 1.0 widgets/SamaelPillSurface.qml
+SamaelCalendarSurface 1.0 widgets/SamaelCalendarSurface.qml
+SamaelNotificationsMenuSurface 1.0 widgets/SamaelNotificationsMenuSurface.qml
+SamaelWifiSurface 1.0 widgets/SamaelWifiSurface.qml
 SamaelBarNav 1.0 widgets/SamaelBarNav.qml
 SamaelNotificationIsland 1.0 widgets/SamaelNotificationIsland.qml
 SamaelClockCalendarDrop 1.0 widgets/SamaelClockCalendarDrop.qml

@@ -344,23 +344,9 @@ Item {
                     active: GlobalStates.samaelClockDropOpen
                     asynchronous: true
                     z: 1
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#4A90D9"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Calendar"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
+                    sourceComponent: SamaelCalendarSurface {
+                        open: true
+                        morphCloseness: centerDock.morphCloseness
                     }
                 }
 
@@ -370,23 +356,9 @@ Item {
                     active: GlobalStates.samaelNotificationsMenuOpen
                     asynchronous: true
                     z: 2
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#7B68EE"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Notifications Menu"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
+                    sourceComponent: SamaelNotificationsMenuSurface {
+                        open: true
+                        morphCloseness: centerDock.morphCloseness
                     }
                 }
 
@@ -396,23 +368,9 @@ Item {
                     active: GlobalStates.samaelWifiMenuOpen
                     asynchronous: true
                     z: 3
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#2ECC71"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Wi-Fi"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
+                    sourceComponent: SamaelWifiSurface {
+                        open: true
+                        morphCloseness: centerDock.morphCloseness
                     }
                 }
 
