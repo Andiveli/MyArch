@@ -17,6 +17,21 @@ Item {
 
     property real cachedCenterBarW: 0
 
+    // ── Test hooks (refs for structural testing) ──
+    property alias idleModulesRef: idleModules
+    property alias surfaceStackRef: surfaceStack
+    property alias centerModulesRef: centerModules
+    property alias ldCalendarRef: ldCalendar
+    property alias ldNotificationsMenuRef: ldNotificationsMenu
+    property alias ldWifiRef: ldWifi
+    property alias ldBluetoothRef: ldBluetooth
+    property alias ldScreenRecorderRef: ldScreenRecorder
+    property alias ldWallpaperRef: ldWallpaper
+    property alias ldPowerRef: ldPower
+    property alias ldMediaRef: ldMedia
+    property alias ldPerformanceRef: ldPerformance
+    property alias ldPopupIslandRef: ldPopupIsland
+
     readonly property real barRowH: Math.max(
         leftGroup.implicitHeight,
         centerModules.implicitHeight,
@@ -268,23 +283,23 @@ Item {
                 height: centerModules.implicitHeight
                 anchors.verticalCenter: parent.verticalCenter
 
-                SamaelModuleGroup {
-                id: centerModules
-                chromeless: centerDock.dockExpanded
-                layoutExpand: clockModule.expanded ? 1 : 0
-                width: centerDock.dockExpanded ? parent.width : implicitWidth
-                x: centerDock.dockExpanded ? 0 : (parent.width - width) / 2
-                y: 0
+                    SamaelModuleGroup {
+                        id: centerModules
+                        chromeless: centerDock.dockExpanded
+                        layoutExpand: clockModule.expanded ? 1 : 0
+                        width: centerDock.dockExpanded ? parent.width : implicitWidth
+                        x: centerDock.dockExpanded ? 0 : (parent.width - width) / 2
+                        y: 0
 
-                NotificationIndicator {}
-                CavaVisualizer {}
-                Separator { variant: "dot-line" }
-                ClockWidget { id: clockModule }
-                Separator { variant: "line" }
-                KanjiWorkspaces {}
-                Separator { variant: "dot-line" }
-                IdleInhibitor {}
-                }
+                        NotificationIndicator {}
+                        CavaVisualizer {}
+                        Separator { variant: "dot-line" }
+                        ClockWidget { id: clockModule }
+                        Separator { variant: "line" }
+                        KanjiWorkspaces {}
+                        Separator { variant: "dot-line" }
+                        IdleInhibitor {}
+                    }
             }
         }
 
@@ -297,16 +312,265 @@ Item {
 
             Behavior on opacity { NumberAnimation { duration: Pill.Motion.standard } }
 
-            Loader { id: ldWallpaper;        active: GlobalStates.wallpaperSelectorOpen;          asynchronous: true; z: 6; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e2e3e"; Text { anchors.centerIn: parent; text: "Wallpaper" } } }
-            Loader { id: ldPower;             active: GlobalStates.sessionOpen;                    asynchronous: true; z: 7; anchors.fill: parent; sourceComponent: Rectangle { color: "#3e2e2e"; Text { anchors.centerIn: parent; text: "Power" } } }
-            Loader { id: ldNotificationsMenu; active: GlobalStates.samaelNotificationsMenuOpen;    asynchronous: true; z: 2; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e3e2e"; Text { anchors.centerIn: parent; text: "Notifications" } } }
-            Loader { id: ldMedia;             active: GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing;     asynchronous: true; z: 8; anchors.fill: parent; sourceComponent: Rectangle { color: "#3e3e2e"; Text { anchors.centerIn: parent; text: "Media" } } }
-            Loader { id: ldPerformance;       active: GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing;  asynchronous: true; z: 9; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e3e3e"; Text { anchors.centerIn: parent; text: "Performance" } } }
-            Loader { id: ldWifi;              active: GlobalStates.samaelWifiMenuOpen;              asynchronous: true; z: 3; anchors.fill: parent; sourceComponent: Rectangle { color: "#3e2e3e"; Text { anchors.centerIn: parent; text: "Wi-Fi" } } }
-            Loader { id: ldBluetooth;         active: GlobalStates.samaelBluetoothMenuOpen;          asynchronous: true; z: 4; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e3e3e"; Text { anchors.centerIn: parent; text: "Bluetooth" } } }
-            Loader { id: ldCalendar;          active: GlobalStates.samaelClockDropOpen;              asynchronous: true; z: 1; anchors.fill: parent; sourceComponent: Rectangle { color: "#3e3e3e"; Text { anchors.centerIn: parent; text: "Calendar" } } }
-            Loader { id: ldScreenRecorder;    active: GlobalStates.samaelRecorderOpen;              asynchronous: true; z: 5; anchors.fill: parent; sourceComponent: Rectangle { color: "#4e2e2e"; Text { anchors.centerIn: parent; text: "Screen Recorder" } } }
-            Loader { id: ldPopupIsland;       active: Notifications.popupList.length > 0 && !GlobalStates.screenLocked;  asynchronous: true; z: 0; anchors.fill: parent; sourceComponent: Rectangle { color: "#2e4e2e"; Text { anchors.centerIn: parent; text: "Popup Island" } } }
+                Loader {
+                    id: ldPopupIsland
+                    anchors.fill: parent
+                    active: Notifications.popupList.length > 0 && !GlobalStates.screenLocked
+                    asynchronous: true
+                    z: 0
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#F39C12"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Notifications Popup"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: ldCalendar
+                    anchors.fill: parent
+                    active: GlobalStates.samaelClockDropOpen
+                    asynchronous: true
+                    z: 1
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#4A90D9"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Calendar"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: ldNotificationsMenu
+                    anchors.fill: parent
+                    active: GlobalStates.samaelNotificationsMenuOpen
+                    asynchronous: true
+                    z: 2
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#7B68EE"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Notifications Menu"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: ldWifi
+                    anchors.fill: parent
+                    active: GlobalStates.samaelWifiMenuOpen
+                    asynchronous: true
+                    z: 3
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#2ECC71"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Wi-Fi"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: ldBluetooth
+                    anchors.fill: parent
+                    active: GlobalStates.samaelBluetoothMenuOpen
+                    asynchronous: true
+                    z: 4
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#3498DB"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Bluetooth"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: ldScreenRecorder
+                    anchors.fill: parent
+                    active: GlobalStates.samaelRecorderOpen
+                    asynchronous: true
+                    z: 5
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#E74C3C"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Screen Recorder"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: ldWallpaper
+                    anchors.fill: parent
+                    active: GlobalStates.wallpaperSelectorOpen
+                    asynchronous: true
+                    z: 6
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#9B59B6"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Wallpaper"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: ldPower
+                    anchors.fill: parent
+                    active: GlobalStates.sessionOpen
+                    asynchronous: true
+                    z: 7
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#E67E22"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Power"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: ldMedia
+                    anchors.fill: parent
+                    active: GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing
+                    asynchronous: true
+                    z: 8
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#1ABC9C"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Media"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: ldPerformance
+                    anchors.fill: parent
+                    active: GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing
+                    asynchronous: true
+                    z: 9
+                    sourceComponent: Component {
+                        SamaelPillSurface {
+                            anchors.fill: parent
+                            open: true
+                            morphCloseness: centerDock.morphCloseness
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                color: "#95A5A6"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Performance"
+                                    color: "white"
+                                    font.pixelSize: 14
+                                }
+                            }
+                        }
+                    }
+                }
         }
     }
 
