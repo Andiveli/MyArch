@@ -1,3 +1,4 @@
 module tests
 ColoursBridgeTest 1.0 ColoursBridgeTest.qml
 SamaelPillSurfaceTest 1.0 SamaelPillSurfaceTest.qml
+SamaelCenterSurfaceTest 1.0 SamaelCenterSurfaceTest.qml

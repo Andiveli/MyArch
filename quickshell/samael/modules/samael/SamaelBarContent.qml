@@ -6,6 +6,7 @@ import qs.modules.common
 import qs.services
 import qs.modules.samael
 import qs.modules.samael.widgets
+import "../../../pill/Singletons" as Pill
 
 Item {
     id: root
@@ -13,9 +14,6 @@ Item {
 
     readonly property int barMarginTop: 3
     readonly property int barMarginLeft: 8
-    /** Match SamaelMediaManagerDrop / compact media row */
-    readonly property int mediaPanelWidth: 728
-    readonly property int performancePanelWidth: 840
 
     property real cachedCenterBarW: 0
 
@@ -145,6 +143,31 @@ Item {
         onTriggered: GlobalStates.samaelIslandPulse = 0
     }
 
+    // ── Center surface controller (per-bar geometry from surfaces table) ──
+    readonly property QtObject controller: QtObject {
+        readonly property var surfaces: ({
+        idle:             { size: () => Qt.size(centerModules.implicitWidth, centerModules.implicitHeight) },
+        calendar:         SamaelCenterSurface.surfaceEntry("calendar", root.barScreenName),
+        notificationsMenu:SamaelCenterSurface.surfaceEntry("notificationsMenu", root.barScreenName),
+        wifi:             SamaelCenterSurface.surfaceEntry("wifi", root.barScreenName),
+        bluetooth:        SamaelCenterSurface.surfaceEntry("bluetooth", root.barScreenName),
+        screenRecorder:   SamaelCenterSurface.surfaceEntry("screenRecorder", root.barScreenName),
+        wallpaper:        SamaelCenterSurface.surfaceEntry("wallpaper", root.barScreenName),
+        power:            SamaelCenterSurface.surfaceEntry("power", root.barScreenName),
+        media:            SamaelCenterSurface.surfaceEntry("media", root.barScreenName),
+        performance:      SamaelCenterSurface.surfaceEntry("performance", root.barScreenName),
+        popupIsland:      SamaelCenterSurface.surfaceEntry("popupIsland", root.barScreenName)
+        })
+
+        readonly property size targetSize: {
+        const entry = surfaces[SamaelCenterSurface.effectiveSurface]
+        return entry ? entry.size() : Qt.size(centerModules.implicitWidth, centerModules.implicitHeight)
+        }
+
+        readonly property real targetW: targetSize.width
+        readonly property real targetH: targetSize.height
+    }
+
     SamaelModuleGroup {
         id: leftGroup
         anchors {
@@ -175,27 +198,31 @@ Item {
 
     Item {
         id: centerDock
-        readonly property real barW: centerModules.implicitWidth
-        readonly property real lerpBarW: root.cachedCenterBarW > 40 ? root.cachedCenterBarW : barW
         readonly property real modulesH: centerModules.implicitHeight
-        readonly property bool dockExpanded: GlobalStates.mediaControlsOpen
-                || GlobalStates.samaelMediaClosing
-                || GlobalStates.samaelPerformanceDropOpen
-                || GlobalStates.samaelPerformanceClosing
+        readonly property bool dockExpanded: SamaelCenterSurface.effectiveSurface !== "idle"
+        /// [0,1] how close the dock is to its target size. 1 = fully morphed.
+        readonly property real morphCloseness: SamaelCenterSurface.computeMorphCloseness(
+            width, height, controller.targetW, controller.targetH, 1)
 
-        width: GlobalStates.mediaControlsOpen
-            ? root.mediaPanelWidth
-            : (GlobalStates.samaelPerformanceDropOpen ? root.performancePanelWidth : lerpBarW)
-        height: modulesH
+        width: controller.targetW
+        height: controller.targetH
         x: (root.width - width) / 2
         y: (root.barRowH - modulesH) / 2
         clip: true
 
         Behavior on width {
             NumberAnimation {
-                duration: Appearance.animation.samaelMediaAttach.duration
-                easing.type: Appearance.animation.samaelMediaAttach.type
-                easing.bezierCurve: Appearance.animation.samaelMediaAttach.bezierCurve
+                duration: Pill.Motion.morph
+                easing.type: Pill.Motion.easeMorph
+                easing.bezierCurve: Pill.Motion.morphCurve
+            }
+        }
+
+        Behavior on height {
+            NumberAnimation {
+                duration: Pill.Motion.morph
+                easing.type: Pill.Motion.easeMorph
+                easing.bezierCurve: Pill.Motion.morphCurve
             }
         }
 

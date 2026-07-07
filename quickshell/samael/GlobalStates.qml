@@ -32,6 +32,7 @@ Singleton {
     property bool samaelWifiMenuOpen: false
     property bool samaelBluetoothMenuOpen: false
     property bool samaelNotificationsMenuOpen: false
+    property bool samaelRecorderOpen: false
     property bool samaelSystemSidebarOpen: false
     property bool samaelSuperMenuOpen: false
     // Screen coords for notification island (updated by focused monitor bar)
