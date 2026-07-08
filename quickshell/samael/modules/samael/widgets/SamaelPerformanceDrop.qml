@@ -15,7 +15,10 @@ Scope {
 
     Loader {
         id: perfLoader
-        active: GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing
+        active: (GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing)
+        && (!SamaelCenterSurface.effectiveSurface
+        || SamaelCenterSurface.effectiveSurface === "idle"
+        || SamaelCenterSurface.effectiveSurface !== "performance")
         sourceComponent: PanelWindow {
             id: perfPanelRoot
             readonly property string targetScreen: GlobalStates.samaelPerformanceScreenName

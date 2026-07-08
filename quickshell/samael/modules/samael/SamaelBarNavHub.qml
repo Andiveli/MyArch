@@ -8,6 +8,10 @@ QtObject {
     property var motherboard: null
     property var clock: null
     property var audio: null
+    /// The currently active surface item (from the focused bar's surface stack).
+    /// Set by SamaelBarContent when effectiveSurface changes.
+    /// Used by keyboard routing to dispatch h/l/j/k/Enter/Esc to the surface.
+    property var currentSurfaceItem: null
 
     function cyclePowerProfile() {
         if (motherboard)

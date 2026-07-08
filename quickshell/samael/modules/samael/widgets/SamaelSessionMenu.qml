@@ -9,6 +9,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.samael
+import qs.modules.samael
 
 Scope {
     id: root
@@ -36,6 +37,9 @@ Scope {
 
     Loader {
         active: GlobalStates.sessionOpen && !GlobalStates.screenLocked
+        && (!SamaelCenterSurface.effectiveSurface
+        || SamaelCenterSurface.effectiveSurface === "idle"
+        || SamaelCenterSurface.effectiveSurface !== "power")
         onActiveChanged: {
             if (!active) {
                 SamaelSessionHub.panel = null

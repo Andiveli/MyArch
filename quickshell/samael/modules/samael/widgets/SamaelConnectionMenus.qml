@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.samael
 import qs.modules.samael.widgets
 
 Scope {

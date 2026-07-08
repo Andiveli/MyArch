@@ -88,12 +88,41 @@ Item {
         GlobalStates.samaelIslandAnchorValid = true
     }
 
-    onWidthChanged: {
+    // ── Surface item tracking for keyboard routing ──
+    // Uses a function instead of a readonly property to avoid forward-id
+    // issues: the value is resolved at call time, not during construction.
+    function _getSurfaceLoader(surfaceId) {
+        return ({
+idle:             null,
+calendar:         ldCalendar,
+notificationsMenu:ldNotificationsMenu,
+wifi:             ldWifi,
+bluetooth:        ldBluetooth,
+screenRecorder:   ldScreenRecorder,
+wallpaper:        ldWallpaper,
+power:            ldPower,
+media:            ldMedia,
+performance:      ldPerformance,
+popupIsland:      ldPopupIsland
+        })[surfaceId] ?? null
+    }
+    
+    Connections {
+        target: SamaelCenterSurface
+        function onEffectiveSurfaceChanged() {
+const ld = root._getSurfaceLoader(SamaelCenterSurface.effectiveSurface)
+SamaelBarNavHub.currentSurfaceItem = ld?.item ?? null
+        }
+    }
+    
+    Component.onCompleted: {
+        const ld = _getSurfaceLoader(SamaelCenterSurface.effectiveSurface)
+        SamaelBarNavHub.currentSurfaceItem = ld?.item ?? null
         publishIslandAnchor()
         publishMediaDockAnchor()
         publishPerformanceDockAnchor()
     }
-    Component.onCompleted: {
+    onWidthChanged: {
         publishIslandAnchor()
         publishMediaDockAnchor()
         publishPerformanceDockAnchor()
@@ -271,7 +300,7 @@ Item {
             bottomRightRadius: 0
         }
 
-        // ── Center modules (always visible — no opacity dependency on effectiveSurface) ──
+        // ── Center modules — fade out when a surface opens ──
         Item {
             id: centerDockModules
             width: parent.width
@@ -281,6 +310,14 @@ Item {
                 id: centerModules
                 chromeless: centerDock.dockExpanded
                 layoutExpand: clockModule.expanded ? 1 : 0
+                // Cross-fade: hide modules when a user surface is open.
+                // Defensive: if effectiveSurface is empty/unset, keep modules visible.
+                opacity: {
+                    const s = SamaelCenterSurface.effectiveSurface
+                    if (!s || s === "idle" || s === "popupIsland") return 1
+                    return 0
+                }
+                Behavior on opacity { NumberAnimation { duration: Pill.Motion.standard } }
                 width: centerDock.dockExpanded ? parent.width : implicitWidth
                 x: centerDock.dockExpanded ? 0 : (parent.width - width) / 2
                 y: (parent.height - height) / 2
@@ -296,12 +333,13 @@ Item {
             }
         }
 
-        // ── Surface stack (visible when a surface is open) ──
+        // ── Surface stack (faded when a surface is open) ──
         Item {
             id: surfaceStack
             width: parent.width
             height: parent.height
-            visible: centerDock.dockExpanded
+            opacity: SamaelCenterSurface.effectiveSurface !== "idle" ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: Pill.Motion.standard } }
 
                 Loader {
                     id: ldPopupIsland
@@ -407,23 +445,9 @@ Item {
                     active: GlobalStates.sessionOpen
                     asynchronous: true
                     z: 7
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#E67E22"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Power"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
+                    sourceComponent: SamaelSessionSurface {
+                        open: true
+                        morphCloseness: centerDock.morphCloseness
                     }
                 }
 
@@ -433,23 +457,9 @@ Item {
                     active: GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing
                     asynchronous: true
                     z: 8
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#1ABC9C"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Media"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
+                    sourceComponent: SamaelMediaSurface {
+                        open: true
+                        morphCloseness: centerDock.morphCloseness
                     }
                 }
 
@@ -459,23 +469,9 @@ Item {
                     active: GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing
                     asynchronous: true
                     z: 9
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#95A5A6"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Performance"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
+                    sourceComponent: SamaelPerformanceSurface {
+                        open: true
+                        morphCloseness: centerDock.morphCloseness
                     }
                 }
         }

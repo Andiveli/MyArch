@@ -16,7 +16,10 @@ Scope {
 
     Loader {
         id: mediaLoader
-        active: GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing
+        active: (GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing)
+        && (!SamaelCenterSurface.effectiveSurface
+        || SamaelCenterSurface.effectiveSurface === "idle"
+        || SamaelCenterSurface.effectiveSurface !== "media")
         sourceComponent: PanelWindow {
             id: mediaPanelRoot
             readonly property string targetScreen: GlobalStates.samaelMediaScreenName

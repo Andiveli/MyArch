@@ -17,10 +17,20 @@ Scope {
     }
 
     function moveH(delta: int) {
+        const item = SamaelBarNavHub.currentSurfaceItem
+        if (item) {
+            SamaelCenterSurface.dispatchToSurface(item, delta < 0 ? "h" : "l")
+            return
+        }
         setFocus(GlobalStates.samaelBarFocus + delta)
     }
-
+    
     function activateFocus() {
+        const item = SamaelBarNavHub.currentSurfaceItem
+        if (item) {
+            SamaelCenterSurface.surfaceActivate(item)
+            return
+        }
         switch (GlobalStates.samaelBarFocus) {
         case 0: SamaelBarNavHub.openAppDrawer(); break
         case 1: SamaelBarNavHub.cyclePowerProfile(); break
@@ -32,8 +42,13 @@ Scope {
         case 7: SamaelBarNavHub.openSession(); break
         }
     }
-
+    
     function actionJ() {
+        const item = SamaelBarNavHub.currentSurfaceItem
+        if (item) {
+            SamaelCenterSurface.surfaceMoveV(item, 1)
+            return
+        }
         const f = GlobalStates.samaelBarFocus
         if (f === 1)
             SamaelBarNavHub.stepPowerProfile(1)
@@ -42,8 +57,13 @@ Scope {
         else
             activateFocus()
     }
-
+    
     function actionK() {
+        const item = SamaelBarNavHub.currentSurfaceItem
+        if (item) {
+            SamaelCenterSurface.surfaceMoveV(item, -1)
+            return
+        }
         const f = GlobalStates.samaelBarFocus
         if (f === 1)
             SamaelBarNavHub.stepPowerProfile(-1)
@@ -63,11 +83,24 @@ Scope {
         Hyprland.dispatch(`hl.dsp.submap("reset")`)
     }
 
-        function deactivate() {
-            GlobalStates.samaelBarNavActive = false
-            SamaelBarNavHub.collapseClock()
-            leaveHyprSubmap()
+        function handleEsc() {
+            const item = SamaelBarNavHub.currentSurfaceItem
+            if (item) {
+                const consumed = SamaelCenterSurface.dispatchToSurface(item, "esc")
+                if (!consumed) {
+                    // Surface's back() returned false → request close
+                    item.requestClose()
+                }
+                return
+            }
+            deactivate()
         }
+
+            function deactivate() {
+                GlobalStates.samaelBarNavActive = false
+                SamaelBarNavHub.collapseClock()
+                leaveHyprSubmap()
+            }
 
         Connections {
             target: GlobalStates
@@ -102,7 +135,7 @@ Scope {
         function l(): void { if (GlobalStates.samaelBarNavActive) root.moveH(1) }
         function j(): void { if (GlobalStates.samaelBarNavActive) root.actionJ() }
         function k(): void { if (GlobalStates.samaelBarNavActive) root.actionK() }
-        function exitNav(): void { if (GlobalStates.samaelBarNavActive) root.deactivate() }
+        function exitNav(): void { if (GlobalStates.samaelBarNavActive) root.handleEsc() }
         function enter(): void { root.activate() }
     }
 }

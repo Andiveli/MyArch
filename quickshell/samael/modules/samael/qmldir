@@ -22,6 +22,9 @@ SamaelNotificationsMenuSurface 1.0 widgets/SamaelNotificationsMenuSurface.qml
 SamaelWifiSurface 1.0 widgets/SamaelWifiSurface.qml
 SamaelBluetoothSurface 1.0 widgets/SamaelBluetoothSurface.qml
 SamaelScreenRecorderSurface 1.0 widgets/SamaelScreenRecorderSurface.qml
+SamaelSessionSurface 1.0 widgets/SamaelSessionSurface.qml
+SamaelMediaSurface 1.0 widgets/SamaelMediaSurface.qml
+SamaelPerformanceSurface 1.0 widgets/SamaelPerformanceSurface.qml
 SamaelWallpaperSurface 1.0 widgets/SamaelWallpaperSurface.qml
 SamaelBarNav 1.0 widgets/SamaelBarNav.qml
 SamaelNotificationIsland 1.0 widgets/SamaelNotificationIsland.qml

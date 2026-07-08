@@ -245,7 +245,7 @@ Scope {
     GlobalShortcut {
         name: "samaelBarNavKeyEsc"
         description: "Samael bar nav Esc (submap)"
-        onPressed: { if (GlobalStates.samaelBarNavActive) barNav.deactivate() }
+        onPressed: { if (GlobalStates.samaelBarNavActive) barNav.handleEsc() }
     }
 
     GlobalShortcut {
