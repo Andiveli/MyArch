@@ -33,8 +33,8 @@ Item {
     }
 
     Timer {
-        interval: 3000
-        running: true
+        interval: 5000
+        running: GlobalStates.barOpen
         repeat: true
         onTriggered: {
             statusProcess.running = false

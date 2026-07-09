@@ -29,10 +29,56 @@ Scope {
                     screen: barLoader.modelData
                     exclusionMode: ExclusionMode.Ignore
                     implicitHeight: barContent.implicitHeight
-                    /** Reserve only the bar row so media drop overlays windows */
+                    /** Always bar row only — center surfaces overlay windows (pill-style), never grow exclusive zone. */
                     exclusiveZone: barContent.barRowH + margins.top
                     WlrLayershell.namespace: "quickshell:samael:bar"
-                    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+                    /** Exclusive while a center surface is open (pill pattern); OnDemand was not receiving keys. */
+                    WlrLayershell.keyboardFocus: barContent.centerDockRef.surfaceOpen
+                        ? WlrKeyboardFocus.Exclusive
+                        : WlrKeyboardFocus.None
+
+                        property string hyprFocusAddrBeforeSurface: ""
+
+                        function captureHyprClientFocus() {
+                            const addr = Hyprland.activeToplevel?.lastIpcObject?.address
+                            if (addr)
+                                barRoot.hyprFocusAddrBeforeSurface = String(addr)
+                        }
+
+                        function restoreHyprClientFocus() {
+                            const addr = barRoot.hyprFocusAddrBeforeSurface
+                            barRoot.hyprFocusAddrBeforeSurface = ""
+                            if (addr.length > 0) {
+                                Hyprland.dispatch("focuswindow", "address:" + addr)
+                                Qt.callLater(() => Hyprland.dispatch("focuswindow", "address:" + addr))
+                            }
+                        }
+
+                    Connections {
+                        target: barContent.centerDockRef
+                        function onSurfaceOpenChanged() {
+                            if (barContent.centerDockRef.surfaceOpen) {
+                                // Save for reliable restore later (global takes precedence over per-bar)
+                                if (typeof SamaelBarNavHub !== "undefined" && SamaelBarNavHub.saveCurrentHyprClient)
+                                    SamaelBarNavHub.saveCurrentHyprClient()
+                                barRoot.captureHyprClientFocus()
+                                Qt.callLater(() => {
+                                    barContent.centerDockRef.scheduleKeyboardFocus()
+                                })
+                            } else {
+                                barContent.centerDockRef.stopKeyboardFocusRetry()
+                                // Prefer the centralized restore (handles all overlays)
+                                if (typeof SamaelBarNavHub !== "undefined" && SamaelBarNavHub.restoreHyprClientIfNeeded)
+                                    Qt.callLater(SamaelBarNavHub.restoreHyprClientIfNeeded)
+                                else
+                                    Qt.callLater(barRoot.restoreHyprClientFocus)
+                            }
+                        }
+                        function onSurfaceChanged() {
+                            if (barContent.centerDockRef.surfaceOpen)
+                                barContent.centerDockRef.scheduleKeyboardFocus()
+                        }
+                    }
 
                 anchors {
                     top: true
@@ -92,25 +138,25 @@ Scope {
     IpcHandler {
         target: "samaelWifiMenu"
 
-        function toggle(): void {
-            GlobalStates.samaelBluetoothMenuOpen = false
-            GlobalStates.samaelNotificationsMenuOpen = false
-            GlobalStates.samaelSystemSidebarOpen = false
-            GlobalStates.samaelSuperMenuOpen = false
-            GlobalStates.samaelWifiMenuOpen = !GlobalStates.samaelWifiMenuOpen
-        }
+            function toggle(): void {
+                GlobalStates.samaelBluetoothMenuOpen = false
+                GlobalStates.samaelNotificationsMenuOpen = false
+                GlobalStates.samaelSystemSidebarOpen = false
+                GlobalStates.samaelSuperMenuOpen = false
+                GlobalStates.samaelWifiMenuOpen = !GlobalStates.samaelWifiMenuOpen
+            }
     }
 
     IpcHandler {
         target: "samaelBluetoothMenu"
 
-        function toggle(): void {
-            GlobalStates.samaelWifiMenuOpen = false
-            GlobalStates.samaelNotificationsMenuOpen = false
-            GlobalStates.samaelSystemSidebarOpen = false
-            GlobalStates.samaelSuperMenuOpen = false
-            GlobalStates.samaelBluetoothMenuOpen = !GlobalStates.samaelBluetoothMenuOpen
-        }
+            function toggle(): void {
+                GlobalStates.samaelWifiMenuOpen = false
+                GlobalStates.samaelNotificationsMenuOpen = false
+                GlobalStates.samaelSystemSidebarOpen = false
+                GlobalStates.samaelSuperMenuOpen = false
+                GlobalStates.samaelBluetoothMenuOpen = !GlobalStates.samaelBluetoothMenuOpen
+            }
     }
 
     IpcHandler {
@@ -246,6 +292,11 @@ Scope {
         name: "samaelBarNavKeyEsc"
         description: "Samael bar nav Esc (submap)"
         onPressed: { if (GlobalStates.samaelBarNavActive) barNav.handleEsc() }
+    }
+    GlobalShortcut {
+        name: "samaelBarNavKeyEnter"
+        description: "Samael bar nav Enter (submap)"
+        onPressed: { if (GlobalStates.samaelBarNavActive) barNav.activateSurfaceOrBar() }
     }
 
     GlobalShortcut {

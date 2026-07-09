@@ -16,6 +16,8 @@ SamaelPillSurface {
     implicitWidth: 400
     implicitHeight: 420
 
+    keyboardPanel: wifiMenu
+
     SamaelWifiMenu {
         id: wifiMenu
         anchors.fill: parent

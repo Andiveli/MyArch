@@ -1,12 +1,10 @@
 import QtQuick
-import QtQuick.Layouts
-import Quickshell.Hyprland
 import qs
 import qs.modules.common
 import qs.services
 import qs.modules.samael
 import qs.modules.samael.widgets
-import "../../../pill/Singletons" as Pill
+import "../../../Singletons" as Pill
 
 Item {
     id: root
@@ -15,11 +13,8 @@ Item {
     readonly property int barMarginTop: 3
     readonly property int barMarginLeft: 8
 
-    property real cachedCenterBarW: 0
-
     // ── Test hooks (refs for structural testing) ──
-    property alias centerDockModulesRef: centerDockModules
-    property alias surfaceStackRef: surfaceStack
+    property alias idleModulesRef: modulesWrapper
     property alias centerModulesRef: centerModules
     property alias ldCalendarRef: ldCalendar
     property alias ldNotificationsMenuRef: ldNotificationsMenu
@@ -30,67 +25,17 @@ Item {
     property alias ldPowerRef: ldPower
     property alias ldMediaRef: ldMedia
     property alias ldPerformanceRef: ldPerformance
-    property alias ldPopupIslandRef: ldPopupIsland
-
-    readonly property real barRowH: Math.max(
+readonly property real barRowH: Math.max(
         leftGroup.implicitHeight,
         centerModules.implicitHeight,
         rightGroup.implicitHeight)
+    
+readonly property real paintHeight: Math.max(barRowH, centerDock.y + centerDock.height)
+implicitHeight: paintHeight
 
-    readonly property real paintHeight: barRowH
-    implicitHeight: paintHeight
-
-    readonly property var centerDockRef: centerDock
-
-        function publishPerformanceDockAnchor() {
-            if (GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing)
-                return
-            if (!barScreenName.length || centerDock.width <= 0)
-                return
-            const focused = Hyprland.focusedMonitor?.name ?? ""
-            if (focused.length && focused !== barScreenName)
-                return
-            const seam = centerDock.mapToItem(root, centerDock.width / 2, centerDock.modulesH)
-            GlobalStates.samaelPerformanceScreenName = barScreenName
-            GlobalStates.samaelPerformanceCenterX = barMarginLeft + seam.x
-            GlobalStates.samaelPerformanceDockTop = barMarginTop + seam.y
-            GlobalStates.samaelPerformanceDockLeft = barMarginLeft + seam.x - centerDock.width / 2
-            GlobalStates.samaelPerformanceDockWidth = centerDock.width
-        }
-
-        function publishMediaDockAnchor() {
-        if (GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing)
-            return
-        if (!barScreenName.length || centerDock.width <= 0)
-            return
-        const focused = Hyprland.focusedMonitor?.name ?? ""
-        if (focused.length && focused !== barScreenName)
-            return
-        const seam = centerDock.mapToItem(root, centerDock.width / 2, centerDock.modulesH)
-        GlobalStates.samaelMediaScreenName = barScreenName
-        GlobalStates.samaelMediaCenterX = barMarginLeft + seam.x
-        GlobalStates.samaelMediaDockTop = barMarginTop + seam.y
-        GlobalStates.samaelMediaDockLeft = barMarginLeft + seam.x - centerDock.width / 2
-        GlobalStates.samaelMediaDockWidth = centerDock.width
-    }
-
-    function publishIslandAnchor() {
-        if (!barScreenName.length || centerModules.width <= 0)
-            return
-        const focused = Hyprland.focusedMonitor?.name ?? ""
-        if (focused.length && focused !== barScreenName)
-            return
-        const bottom = centerDock.mapToItem(root, centerDock.width / 2, centerDock.modulesH)
-        GlobalStates.samaelIslandScreenName = barScreenName
-        GlobalStates.samaelIslandTop = barMarginTop + bottom.y - 1
-        GlobalStates.samaelIslandLeft = barMarginLeft + bottom.x - centerDock.width / 2
-        GlobalStates.samaelIslandWidth = centerDock.width
-        GlobalStates.samaelIslandAnchorValid = true
-    }
+readonly property var centerDockRef: centerDock
 
     // ── Surface item tracking for keyboard routing ──
-    // Uses a function instead of a readonly property to avoid forward-id
-    // issues: the value is resolved at call time, not during construction.
     function _getSurfaceLoader(surfaceId) {
         return ({
 idle:             null,
@@ -102,115 +47,29 @@ screenRecorder:   ldScreenRecorder,
 wallpaper:        ldWallpaper,
 power:            ldPower,
 media:            ldMedia,
-performance:      ldPerformance,
-popupIsland:      ldPopupIsland
+performance:      ldPerformance
         })[surfaceId] ?? null
     }
-    
-    Connections {
-        target: SamaelCenterSurface
-        function onEffectiveSurfaceChanged() {
-const ld = root._getSurfaceLoader(SamaelCenterSurface.effectiveSurface)
-SamaelBarNavHub.currentSurfaceItem = ld?.item ?? null
-        }
-    }
-    
-    Component.onCompleted: {
-        const ld = _getSurfaceLoader(SamaelCenterSurface.effectiveSurface)
-        SamaelBarNavHub.currentSurfaceItem = ld?.item ?? null
-        publishIslandAnchor()
-        publishMediaDockAnchor()
-        publishPerformanceDockAnchor()
-    }
-    onWidthChanged: {
-        publishIslandAnchor()
-        publishMediaDockAnchor()
-        publishPerformanceDockAnchor()
-    }
 
-    Connections {
-        target: GlobalStates
-        function onMediaControlsOpenChanged() {
-            if (GlobalStates.mediaControlsOpen) {
-                GlobalStates.samaelMediaClosing = false
-                const w = centerModules.implicitWidth
-                if (w > 40)
-                    root.cachedCenterBarW = w
-                const seam = centerDock.mapToItem(root, centerDock.width / 2, centerDock.modulesH)
-                GlobalStates.samaelMediaScreenName = barScreenName
-                GlobalStates.samaelMediaCenterX = barMarginLeft + seam.x
-                GlobalStates.samaelMediaDockTop = barMarginTop + seam.y
-                GlobalStates.samaelMediaDockLeft = barMarginLeft + seam.x - centerDock.width / 2
-                GlobalStates.samaelMediaDockWidth = centerDock.width
-            } else {
-                publishMediaDockAnchor()
-            }
-        }
-        function onSamaelPerformanceDropOpenChanged() {
-            if (GlobalStates.samaelPerformanceDropOpen) {
-                GlobalStates.samaelPerformanceClosing = false
-                const w = centerModules.implicitWidth
-                if (w > 40)
-                    root.cachedCenterBarW = w
-                const seam = centerDock.mapToItem(root, centerDock.width / 2, centerDock.modulesH)
-                GlobalStates.samaelPerformanceScreenName = barScreenName
-                GlobalStates.samaelPerformanceCenterX = barMarginLeft + seam.x
-                GlobalStates.samaelPerformanceDockTop = barMarginTop + seam.y
-                GlobalStates.samaelPerformanceDockLeft = barMarginLeft + seam.x - centerDock.width / 2
-                GlobalStates.samaelPerformanceDockWidth = centerDock.width
-            } else {
-                publishPerformanceDockAnchor()
-            }
-        }
+    function _syncSurfaceItemToHub() {
+        const sid = centerDock.surface
+        const ld = _getSurfaceLoader(sid === "idle" ? "" : sid)
+        SamaelBarNavHub.currentSurfaceItem = ld?.item ?? null
     }
 
     Connections {
         target: centerDock
-        function onWidthChanged() {
-            root.publishIslandAnchor()
-            root.publishMediaDockAnchor()
-            root.publishPerformanceDockAnchor()
+        function onSurfaceChanged() {
+root._syncSurfaceItemToHub()
+centerDock.scheduleKeyboardFocus()
         }
     }
-    Connections {
-        target: Notifications
-        function onNotify() {
-            root.publishIslandAnchor()
-            GlobalStates.samaelIslandPulse = 1
-            islandPulseDecay.restart()
-        }
-        function onListChanged() { root.publishIslandAnchor() }
-    }
-    Timer {
-        id: islandPulseDecay
-        interval: 500
-        onTriggered: GlobalStates.samaelIslandPulse = 0
-    }
 
-    // ── Center surface controller (per-bar geometry from surfaces table) ──
-    readonly property QtObject controller: QtObject {
-        readonly property var surfaces: ({
-        idle:             { size: () => Qt.size(centerModules.implicitWidth, centerModules.implicitHeight) },
-        calendar:         SamaelCenterSurface.surfaceEntry("calendar", root.barScreenName),
-        notificationsMenu:SamaelCenterSurface.surfaceEntry("notificationsMenu", root.barScreenName),
-        wifi:             SamaelCenterSurface.surfaceEntry("wifi", root.barScreenName),
-        bluetooth:        SamaelCenterSurface.surfaceEntry("bluetooth", root.barScreenName),
-        screenRecorder:   SamaelCenterSurface.surfaceEntry("screenRecorder", root.barScreenName),
-        wallpaper:        SamaelCenterSurface.surfaceEntry("wallpaper", root.barScreenName),
-        power:            SamaelCenterSurface.surfaceEntry("power", root.barScreenName),
-        media:            SamaelCenterSurface.surfaceEntry("media", root.barScreenName),
-        performance:      SamaelCenterSurface.surfaceEntry("performance", root.barScreenName),
-        popupIsland:      SamaelCenterSurface.surfaceEntry("popupIsland", root.barScreenName)
-        })
+    Component.onCompleted: _syncSurfaceItemToHub()
 
-        readonly property size targetSize: {
-        const entry = surfaces[SamaelCenterSurface.effectiveSurface]
-        return entry ? entry.size() : Qt.size(centerModules.implicitWidth, centerModules.implicitHeight)
-        }
 
-        readonly property real targetW: targetSize.width
-        readonly property real targetH: targetSize.height
-    }
+
+
 
     SamaelModuleGroup {
         id: leftGroup
@@ -242,85 +101,181 @@ SamaelBarNavHub.currentSurfaceItem = ld?.item ?? null
 
     Item {
         id: centerDock
-        readonly property real modulesH: centerModules.implicitHeight
-        readonly property bool dockExpanded: SamaelCenterSurface.effectiveSurface !== "idle"
-        /// [0,1] how close the dock is to its target size. 1 = fully morphed.
-        readonly property real morphCloseness: SamaelCenterSurface.computeMorphCloseness(
-            width, height, controller.targetW, controller.targetH, 1)
+    
+        // ── Reactive surface cascade (pill-aligned) ──
+        // Precedence here mirrors SamaelCenterSurface (dock reads GlobalStates directly).
+        function resolveCenterSurface() {
+            if (GlobalStates.wallpaperSelectorOpen)
+                return "wallpaper"
+            if (GlobalStates.sessionOpen)
+                return "power"
+            if (GlobalStates.samaelNotificationsMenuOpen)
+                return "notificationsMenu"
+            if (GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing)
+                return "media"
+            if (GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing)
+                return "performance"
+            if (GlobalStates.samaelWifiMenuOpen)
+                return "wifi"
+            if (GlobalStates.samaelBluetoothMenuOpen)
+                return "bluetooth"
+            if (GlobalStates.samaelClockDropOpen)
+                return "calendar"
+            if (GlobalStates.samaelRecorderOpen)
+                return "screenRecorder"
+            return "idle"
+        }
 
-        width: controller.targetW
-        height: controller.targetH
+        readonly property string surface: resolveCenterSurface()
+            readonly property bool surfaceOpen: surface !== "idle"
+            readonly property bool expanded: surfaceOpen
+
+                function tryFocusKeyboardPanel() {
+                    if (!surfaceOpen)
+                        return false
+                    const ld = root._getSurfaceLoader(surface)
+                    const item = ld?.item
+                    if (!item)
+                        return false
+                    const panel = item.keyboardPanel ?? item
+                    panel.forceActiveFocus()
+                    return true
+                }
+
+                function stopKeyboardFocusRetry() {
+                    keyboardFocusRetry.stop()
+                }
+
+                function scheduleKeyboardFocus() {
+                    if (!surfaceOpen) {
+                        keyboardFocusRetry.stop()
+                        return
+                    }
+                    if (tryFocusKeyboardPanel())
+                        keyboardFocusRetry.stop()
+                    else
+                        keyboardFocusRetry.start()
+                }
+
+                Timer {
+                    id: keyboardFocusRetry
+                    interval: 40
+                    repeat: true
+                    onTriggered: {
+                        if (centerDock.tryFocusKeyboardPanel())
+                            stop()
+                    }
+                }
+        
+            // ── Surface loader helper: activate on first read, never unload ──
+        function surfaceItem(ld) {
+            ld.active = true
+            return ld.item
+        }
+    
+        // ── Surfaces table: size thunks match pill/Pill.qml pattern ──
+        readonly property var surfaces: ({
+            calendar:          { size: () => { const it = surfaceItem(ldCalendar); return Qt.size(it.implicitWidth + 36, it.implicitHeight + 32); } },
+            notificationsMenu: { size: () => { const it = surfaceItem(ldNotificationsMenu); return Qt.size(it.implicitWidth, it.implicitHeight); } },
+            wifi:              { size: () => { const it = surfaceItem(ldWifi); return Qt.size(it.implicitWidth, it.implicitHeight); } },
+            bluetooth:         { size: () => { const it = surfaceItem(ldBluetooth); return Qt.size(it.implicitWidth, it.implicitHeight); } },
+            screenRecorder:    { size: () => { const it = surfaceItem(ldScreenRecorder); return Qt.size(it.implicitWidth, it.implicitHeight); } },
+            wallpaper:         { size: () => { const it = surfaceItem(ldWallpaper); return Qt.size(it.implicitWidth, it.implicitHeight); } },
+            power:             { size: () => { const it = surfaceItem(ldPower); return Qt.size(it.implicitWidth, it.implicitHeight); } },
+            media:             { size: () => { const it = surfaceItem(ldMedia); return Qt.size(it.implicitWidth, it.implicitHeight); } },
+            performance:       { size: () => { const it = surfaceItem(ldPerformance); return Qt.size(it.implicitWidth, it.implicitHeight); } }
+        })
+    
+        readonly property var modeSize: ({
+            idle: () => Qt.size(centerModules.implicitWidth, centerModules.implicitHeight)
+        })
+    
+            readonly property size targetSize: {
+                if (!surfaceOpen)
+                    return Qt.size(centerModules.implicitWidth, centerModules.implicitHeight)
+                const ld = root._getSurfaceLoader(surface)
+                if (ld)
+                    ld.active = true
+                const it = ld?.item
+                if (it && it.implicitWidth > 0 && it.implicitHeight > 0) {
+                    const sf = surfaces[surface]
+                    if (sf)
+                        return sf.size()
+                    return Qt.size(it.implicitWidth, it.implicitHeight)
+                }
+                const mins = surfaces[surface]
+                if (mins) {
+                    const ld2 = root._getSurfaceLoader(surface)
+                    if (ld2?.item)
+                        return mins.size()
+                }
+                return Qt.size(Math.max(centerModules.implicitWidth, 320),
+                               Math.max(centerModules.implicitHeight, 280))
+            }
+            readonly property real targetW: targetSize.width
+            readonly property real targetH: targetSize.height
+
+            width: targetW
+            height: targetH
         x: (root.width - width) / 2
-        y: (root.barRowH - modulesH) / 2
-        clip: true
+        y: 0
+        clip: false
 
-        Behavior on width {
-            enabled: centerDock.dockExpanded
-            NumberAnimation {
-                duration: Pill.Motion.morph
-                easing.type: Pill.Motion.easeMorph
-                easing.bezierCurve: Pill.Motion.morphCurve
-            }
+        readonly property bool idleMorphHop: !surfaceOpen || surface === "idle"
+        readonly property int morphDuration: idleMorphHop ? Pill.Motion.glide : Pill.Motion.morph
+
+        Behavior on width { NumberAnimation { duration: centerDock.morphDuration; easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: centerDock.morphDuration; easing.type: Easing.OutCubic } }
+
+        // ── Morph closeness: syncs all content fade with the geometry morph ──
+        readonly property real morphCloseness: {
+            const d = Math.max(Math.abs(width - targetW), Math.abs(height - targetH))
+            return 1 - Math.min(1, d / (110 * 1))
         }
 
-        Behavior on height {
-            enabled: centerDock.dockExpanded
-            NumberAnimation {
-                duration: Pill.Motion.morph
-                easing.type: Pill.Motion.easeMorph
-                easing.bezierCurve: Pill.Motion.morphCurve
-            }
-        }
-
-        /** Seam to media drop: flat bottom, rounded top only */
-        readonly property int dockChromeR: 15
-        readonly property int dockFillR: 13
+        // ── Chrome: uniform rounded corners (no seam — drops are in-dock) ──
+        readonly property int dockR: 15
 
         Rectangle {
             anchors.fill: parent
-            visible: centerDock.dockExpanded
+            visible: centerDock.surfaceOpen
             color: "transparent"
             border.width: 2
             border.color: WallustColors.borderColor
-            topLeftRadius: centerDock.dockChromeR
-            topRightRadius: centerDock.dockChromeR
-            bottomLeftRadius: 0
-            bottomRightRadius: 0
+            radius: centerDock.dockR
         }
 
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: centerDock.dockExpanded ? 2 : 0
-            anchors.bottomMargin: centerDock.dockExpanded ? 0 : 0
-            visible: centerDock.dockExpanded
-            color: SamaelStyle.menuPanelFill
-            topLeftRadius: centerDock.dockFillR
-            topRightRadius: centerDock.dockFillR
-            bottomLeftRadius: 0
-            bottomRightRadius: 0
-        }
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: centerDock.surfaceOpen ? 2 : 0
+                visible: centerDock.surfaceOpen
+                color: SamaelStyle.menuPanelFill
+                radius: centerDock.dockR - 2
+            }
 
-        // ── Center modules — fade out when a surface opens ──
+            // ── Idle content (center modules) — fades out via morphCloseness ──
+        // Matches pill's `rest` section exactly.
         Item {
-            id: centerDockModules
-            width: parent.width
-            height: parent.height
+            id: modulesWrapper
+            anchors.fill: parent
+            opacity: centerDock.expanded ? 0 : Math.pow(centerDock.morphCloseness, 1.5)
+            visible: opacity > 0.01
+            Behavior on opacity { NumberAnimation { duration: Pill.Motion.fast; easing.type: Easing.OutCubic } }
 
-            SamaelModuleGroup {
+            /** Idle widgets stay on the bar row — not vertically re-centered as the dock grows. */
+            Item {
+                id: centerModulesBand
+                anchors.top: parent.top
+                width: parent.width
+                height: root.barRowH
+
+                SamaelModuleGroup {
                 id: centerModules
-                chromeless: centerDock.dockExpanded
+                chromeless: false
                 layoutExpand: clockModule.expanded ? 1 : 0
-                // Cross-fade: hide modules when a user surface is open.
-                // Defensive: if effectiveSurface is empty/unset, keep modules visible.
-                opacity: {
-                    const s = SamaelCenterSurface.effectiveSurface
-                    if (!s || s === "idle" || s === "popupIsland") return 1
-                    return 0
-                }
-                Behavior on opacity { NumberAnimation { duration: Pill.Motion.standard } }
-                width: centerDock.dockExpanded ? parent.width : implicitWidth
-                x: centerDock.dockExpanded ? 0 : (parent.width - width) / 2
-                y: (parent.height - height) / 2
+                width: implicitWidth
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
 
                 NotificationIndicator {}
                 CavaVisualizer {}
@@ -330,150 +285,122 @@ SamaelBarNavHub.currentSurfaceItem = ld?.item ?? null
                 KanjiWorkspaces {}
                 Separator { variant: "dot-line" }
                 IdleInhibitor {}
+                }
             }
         }
 
-        // ── Surface stack (faded when a surface is open) ──
-        Item {
-            id: surfaceStack
-            width: parent.width
-            height: parent.height
-            opacity: SamaelCenterSurface.effectiveSurface !== "idle" ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: Pill.Motion.standard } }
+        // ── Surface loaders (pill-aligned) ──
+        // Each starts inactive and is lazy-activated by surfaceItem() on first open.
+        // Once activated, the loader stays active forever (never unloads).
+        // No asynchronous flag: surfaceItem() needs synchronous load for exact size.
 
-                Loader {
-                    id: ldPopupIsland
-                    anchors.fill: parent
-                    active: Notifications.popupList.length > 0 && !GlobalStates.screenLocked
-                    asynchronous: true
-                    z: 0
-                    sourceComponent: Component {
-                        SamaelPillSurface {
-                            anchors.fill: parent
-                            open: true
-                            morphCloseness: centerDock.morphCloseness
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                color: "#F39C12"
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "Notifications Popup"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                }
-                            }
-                        }
-                    }
-                }
+        Loader {
+            id: ldCalendar
+            anchors.fill: parent
+            active: false
+            z: 1
+            sourceComponent: SamaelCalendarSurface {
+                open: centerDock.surface === "calendar"
+                morphCloseness: centerDock.morphCloseness
+            }
+        }
 
-                Loader {
-                    id: ldCalendar
-                    anchors.fill: parent
-                    active: GlobalStates.samaelClockDropOpen
-                    asynchronous: true
-                    z: 1
-                    sourceComponent: SamaelCalendarSurface {
-                        open: true
-                        morphCloseness: centerDock.morphCloseness
-                    }
-                }
+        Loader {
+            id: ldNotificationsMenu
+            anchors.fill: parent
+            active: false
+            z: 2
+            sourceComponent: SamaelNotificationsMenuSurface {
+                open: centerDock.surface === "notificationsMenu"
+                morphCloseness: centerDock.morphCloseness
+            }
+        }
 
-                Loader {
-                    id: ldNotificationsMenu
-                    anchors.fill: parent
-                    active: GlobalStates.samaelNotificationsMenuOpen
-                    asynchronous: true
-                    z: 2
-                    sourceComponent: SamaelNotificationsMenuSurface {
-                        open: true
-                        morphCloseness: centerDock.morphCloseness
-                    }
-                }
+        Loader {
+            id: ldWifi
+            anchors.fill: parent
+            active: false
+            z: 3
+            sourceComponent: SamaelWifiSurface {
+                open: centerDock.surface === "wifi"
+                morphCloseness: centerDock.morphCloseness
+            }
+        }
 
-                Loader {
-                    id: ldWifi
-                    anchors.fill: parent
-                    active: GlobalStates.samaelWifiMenuOpen
-                    asynchronous: true
-                    z: 3
-                    sourceComponent: SamaelWifiSurface {
-                        open: true
-                        morphCloseness: centerDock.morphCloseness
-                    }
-                }
+        Loader {
+            id: ldBluetooth
+            anchors.fill: parent
+            active: false
+            z: 4
+            sourceComponent: SamaelBluetoothSurface {
+                open: centerDock.surface === "bluetooth"
+                morphCloseness: centerDock.morphCloseness
+            }
+        }
 
-                Loader {
-                    id: ldBluetooth
-                    anchors.fill: parent
-                    active: GlobalStates.samaelBluetoothMenuOpen
-                    asynchronous: true
-                    z: 4
-                    sourceComponent: SamaelBluetoothSurface {
-                        open: true
-                        morphCloseness: centerDock.morphCloseness
-                    }
-                }
+        Loader {
+            id: ldScreenRecorder
+            anchors.fill: parent
+            active: false
+            z: 5
+            sourceComponent: SamaelScreenRecorderSurface {
+                open: centerDock.surface === "screenRecorder"
+                morphCloseness: centerDock.morphCloseness
+            }
+        }
 
-                Loader {
-                    id: ldScreenRecorder
-                    anchors.fill: parent
-                    active: GlobalStates.samaelRecorderOpen
-                    asynchronous: true
-                    z: 5
-                    sourceComponent: SamaelScreenRecorderSurface {
-                        open: true
-                        morphCloseness: centerDock.morphCloseness
-                    }
-                }
+        Loader {
+            id: ldWallpaper
+            anchors.fill: parent
+            active: false
+            z: 6
+            sourceComponent: SamaelWallpaperSurface {
+                open: centerDock.surface === "wallpaper"
+                morphCloseness: centerDock.morphCloseness
+            }
+        }
 
-                Loader {
-                    id: ldWallpaper
-                    anchors.fill: parent
-                    active: GlobalStates.wallpaperSelectorOpen
-                    asynchronous: true
-                    z: 6
-                    sourceComponent: SamaelWallpaperSurface {
-                        open: true
-                        morphCloseness: centerDock.morphCloseness
-                    }
-                }
+        Loader {
+            id: ldPower
+            anchors.fill: parent
+            active: false
+            z: 7
+            sourceComponent: SamaelSessionSurface {
+                open: centerDock.surface === "power"
+                morphCloseness: centerDock.morphCloseness
+            }
+        }
 
-                Loader {
-                    id: ldPower
-                    anchors.fill: parent
-                    active: GlobalStates.sessionOpen
-                    asynchronous: true
-                    z: 7
-                    sourceComponent: SamaelSessionSurface {
-                        open: true
-                        morphCloseness: centerDock.morphCloseness
-                    }
-                }
+        Loader {
+            id: ldMedia
+            anchors.fill: parent
+            active: false
+            z: 8
+            sourceComponent: SamaelMediaSurface {
+                open: centerDock.surface === "media"
+                morphCloseness: centerDock.morphCloseness
+            }
+        }
 
-                Loader {
-                    id: ldMedia
-                    anchors.fill: parent
-                    active: GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing
-                    asynchronous: true
-                    z: 8
-                    sourceComponent: SamaelMediaSurface {
-                        open: true
-                        morphCloseness: centerDock.morphCloseness
-                    }
-                }
+        Loader {
+            id: ldPerformance
+            anchors.fill: parent
+            active: false
+            z: 9
+            sourceComponent: SamaelPerformanceSurface {
+                open: centerDock.surface === "performance"
+                morphCloseness: centerDock.morphCloseness
+            }
+        }
 
-                Loader {
-                    id: ldPerformance
-                    anchors.fill: parent
-                    active: GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing
-                    asynchronous: true
-                    z: 9
-                    sourceComponent: SamaelPerformanceSurface {
-                        open: true
-                        morphCloseness: centerDock.morphCloseness
-                    }
-                }
+        // ── Preload hot surfaces after startup (pill pattern) ──
+        Timer {
+            interval: 2500
+            running: GlobalStates.barOpen
+            onTriggered: {
+                ldMedia.active = true
+                ldPerformance.active = true
+            }
         }
     }
 

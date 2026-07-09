@@ -1,6 +1,7 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import qs
 import qs.services
 
@@ -85,8 +86,14 @@ QtObject {
 
     function toggleMediaManager() {
         const opening = !GlobalStates.mediaControlsOpen
+        if (opening) {
+            saveCurrentHyprClient()
+        }
         closeSamaelOverlaysExcept("media")
         GlobalStates.mediaControlsOpen = opening
+        if (!opening) {
+            Qt.callLater(restoreHyprClientIfNeeded)
+        }
     }
 
     function openNotificationsMenu() {
@@ -96,14 +103,26 @@ QtObject {
 
     function toggleSystemSidebar() {
         const opening = !GlobalStates.samaelSystemSidebarOpen
+        if (opening) {
+            saveCurrentHyprClient()
+        }
         closeSamaelOverlaysExcept("systemSidebar")
         GlobalStates.samaelSystemSidebarOpen = opening
+        if (!opening) {
+            Qt.callLater(restoreHyprClientIfNeeded)
+        }
     }
 
     function togglePerformanceDrop() {
         const opening = !GlobalStates.samaelPerformanceDropOpen
+        if (opening) {
+            saveCurrentHyprClient()
+        }
         closeSamaelOverlaysExcept("performance")
         GlobalStates.samaelPerformanceDropOpen = opening
+        if (!opening) {
+            Qt.callLater(restoreHyprClientIfNeeded)
+        }
     }
 
     function toggleSuperMenu() {
@@ -135,5 +154,25 @@ QtObject {
 
     function openAppDrawer() {
         Quickshell.execDetached("rofi -show drun -modi run,drun,filebrowser,window")
+    }
+
+    // ── Mapeo simple de foco Hyprland ──
+    // Guardás el cliente activo ANTES de abrir cualquier cosa que robe el foco (media, sidebars, etc.).
+    // Al cerrar, restaurás con los dos dispatch (patrón que funciona confiable en Hyprland).
+    function saveCurrentHyprClient() {
+        if (GlobalStates.hyprLastClientBeforeOverlay && GlobalStates.hyprLastClientBeforeOverlay.length > 0)
+            return
+        const addr = Hyprland.activeToplevel?.lastIpcObject?.address
+        if (addr)
+            GlobalStates.hyprLastClientBeforeOverlay = String(addr)
+    }
+
+    function restoreHyprClient() {
+        const addr = GlobalStates.hyprLastClientBeforeOverlay
+        if (!addr || addr.length === 0)
+            return
+        GlobalStates.hyprLastClientBeforeOverlay = ""
+        Hyprland.dispatch("focuswindow", "address:" + addr)
+        Qt.callLater(() => Hyprland.dispatch("focuswindow", "address:" + addr))
     }
 }

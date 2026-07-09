@@ -43,6 +43,15 @@ Scope {
         }
     }
     
+    function activateSurfaceOrBar() {
+        const item = SamaelBarNavHub.currentSurfaceItem
+        if (item) {
+            SamaelCenterSurface.surfaceActivate(item)
+            return
+        }
+        activateFocus()
+    }
+
     function actionJ() {
         const item = SamaelBarNavHub.currentSurfaceItem
         if (item) {
@@ -131,11 +140,15 @@ Scope {
             root.setFocus(n)
             root.enterHyprSubmap()
         }
-        function h(): void { if (GlobalStates.samaelBarNavActive) root.moveH(-1) }
-        function l(): void { if (GlobalStates.samaelBarNavActive) root.moveH(1) }
-        function j(): void { if (GlobalStates.samaelBarNavActive) root.actionJ() }
-        function k(): void { if (GlobalStates.samaelBarNavActive) root.actionK() }
-        function exitNav(): void { if (GlobalStates.samaelBarNavActive) root.handleEsc() }
-        function enter(): void { root.activate() }
+            function h(): void { if (GlobalStates.samaelBarNavActive) root.moveH(-1) }
+            function l(): void { if (GlobalStates.samaelBarNavActive) root.moveH(1) }
+            function j(): void { if (GlobalStates.samaelBarNavActive) root.actionJ() }
+            function k(): void { if (GlobalStates.samaelBarNavActive) root.actionK() }
+            function exitNav(): void { if (GlobalStates.samaelBarNavActive) root.handleEsc() }
+            function activateSurfaceOrBar(): void {
+                if (GlobalStates.samaelBarNavActive)
+                    root.activateSurfaceOrBar()
+            }
+            function enter(): void { root.activate() }
     }
 }

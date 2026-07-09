@@ -14,6 +14,7 @@ import "../../../../pill/Singletons" as PillSingletons
  */
 Item {
     id: surface
+    focus: open && !!keyboardPanel
 
     property real s: 1
     property bool open: false
@@ -26,20 +27,17 @@ Item {
 
     signal requestClose()
 
+    /** Item with Keys.onPressed (wifi menu, perf body, media manager, …) */
+    property Item keyboardPanel: null
+
     readonly property bool active: open
 
-    /**
-     * Latched true once the open morph has first settled. The morphCloseness gate
-     * is only there for the rest-to-surface open fade. A relayout inside an open
-     * surface (a collapsible dropdown snapping its height into implicitHeight) also
-     * jumps the target geometry, so closeness craters and the whole surface dims
-     * for one frame until the body height Behavior catches up. After the surface
-     * has settled, hold full opacity and let the body morph alone do the reveal.
-     * Reset on close so the next open still fades in.
-     */
-    property bool settled: false
-    onOpenChanged: if (!open) settled = false
-    onMorphClosenessChanged: if (open && morphCloseness > 0.92) settled = true
+    Keys.forwardTo: keyboardPanel ? [keyboardPanel] : []
+
+    onOpenChanged: {
+        if (open && keyboardPanel)
+            Qt.callLater(() => keyboardPanel.forceActiveFocus())
+    }
 
     anchors.fill: parent
     anchors.topMargin: mTop * s
@@ -48,11 +46,11 @@ Item {
     anchors.bottomMargin: mBottom * s
 
     enabled: open
-    opacity: open ? (settled ? 1 : Math.pow(morphCloseness, 1.3)) : 0
-    visible: opacity > 0.01
+    opacity: open ? 1 : 0
+    visible: open
 
     Behavior on opacity {
-        NumberAnimation { duration: PillSingletons.Motion.standard; easing.type: PillSingletons.Motion.easeStandard }
+        NumberAnimation { duration: PillSingletons.Motion.fast; easing.type: Easing.OutCubic }
     }
 
     // --- Keyboard API (overridable no-ops) ---

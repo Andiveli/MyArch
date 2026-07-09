@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs
 
 /**
  * Samael system sidebar data: CPU, RAM, disk, temp, top processes.
@@ -102,16 +103,16 @@ Singleton {
     FileView { id: tempReader; path: tempPaths[0] }
 
     Timer {
-        interval: 1000
-        running: true
+        interval: 2000
+        running: GlobalStates.barOpen || GlobalStates.samaelSystemSidebarOpen || GlobalStates.samaelPerformanceDropOpen
         repeat: true
         triggeredOnStart: true
         onTriggered: root.pollCpu()
     }
 
     Timer {
-        interval: 5000
-        running: true
+        interval: 8000
+        running: GlobalStates.barOpen || GlobalStates.samaelSystemSidebarOpen || GlobalStates.samaelPerformanceDropOpen
         repeat: true
         triggeredOnStart: true
         onTriggered: {

@@ -15,10 +15,16 @@ SamaelPillSurface {
     onRequestClose: {
         GlobalStates.samaelPerformanceDropOpen = false
         GlobalStates.samaelPerformanceClosing = false
+        Qt.callLater(() => {
+            if (typeof SamaelBarNavHub !== "undefined" && SamaelBarNavHub.restoreHyprClientIfNeeded)
+                SamaelBarNavHub.restoreHyprClientIfNeeded()
+        })
     }
 
     implicitWidth: 840
     implicitHeight: perfBody.implicitHeight
+
+    keyboardPanel: perfBody
 
     SamaelPerformanceDropBody {
         id: perfBody

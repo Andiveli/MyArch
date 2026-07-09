@@ -1879,5 +1879,11 @@ PerfControls.StyledSlider {
                 Qt.callLater(() => root.forceActiveFocus())
             }
         }
+        function onSamaelPerformanceDropOpenChanged() {
+            if (GlobalStates.samaelPerformanceDropOpen && root.performanceDropMode) {
+                root.rebuildFocusRows()
+                Qt.callLater(() => root.forceActiveFocus())
+            }
+        }
     }
 }

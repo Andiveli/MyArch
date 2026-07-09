@@ -44,8 +44,8 @@ Item {
     }
 
     Timer {
-        interval: 1500
-        running: true
+        interval: 3000
+        running: GlobalStates.barOpen
         repeat: true
         onTriggered: {
             capsProc.running = false

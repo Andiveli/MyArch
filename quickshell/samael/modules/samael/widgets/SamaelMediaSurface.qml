@@ -15,10 +15,17 @@ SamaelPillSurface {
     onRequestClose: {
         GlobalStates.mediaControlsOpen = false
         GlobalStates.samaelMediaClosing = false
+        // Ensure we give focus back to the previous client (Hyprland doesn't do it automatically)
+        Qt.callLater(() => {
+            if (typeof SamaelBarNavHub !== "undefined" && SamaelBarNavHub.restoreHyprClientIfNeeded)
+                SamaelBarNavHub.restoreHyprClientIfNeeded()
+        })
     }
 
     implicitWidth: 728
     implicitHeight: mediaManager.implicitHeight
+
+    keyboardPanel: mediaManager
 
     SamaelMediaManager {
         id: mediaManager
@@ -31,16 +38,15 @@ SamaelPillSurface {
     // ── Keyboard API — delegate to SamaelMediaManager's controls ──
 
     function moveH(dir) {
-        // Cycle through controls: shuffle ← prev ← play/pause ← next ← loop
-        // For now, no-op as SamaelMediaManager handles its own focus
+        mediaManager.moveControlFocus(dir)
     }
 
     function moveV(dir) {
-        // Seek backward/forward
+        mediaManager.seekBy(dir > 0 ? mediaManager.seekStepSec : -mediaManager.seekStepSec)
     }
 
     function activate() {
-        // Toggle play/pause
+        mediaManager.activateFocusedControl()
     }
 
     function back() {

@@ -3,11 +3,9 @@ import QtTest
 import qs.modules.samael
 
 /**
- * Tests for SamaelBarContent surface stack structure: idleModules wrapper,
- * surfaceStack with 10 Loaders, cross-fade opacity bindings, z-ordering,
- * and asynchronous loading.
- *
- * These are structural/behavioral tests — no visual rendering dependency.
+ * Tests for SamaelBarContent pill-like morph architecture: idle modules
+ * wrapper with morphCloseness-based opacity, direct surface Loader children,
+ * z-ordering, and asynchronous loading.
  */
 TestCase {
     name: "SamaelBarContentSurfaceStack"
@@ -19,13 +17,12 @@ TestCase {
     function test_core_structure() {
         verify(barContent.centerDockRef !== null, "centerDock should exist")
         verify(barContent.idleModulesRef !== null, "idleModules should exist")
-        verify(barContent.surfaceStackRef !== null, "surfaceStack should exist")
     }
 
     function test_idleModules_contains_centerModules() {
         verify(barContent.centerModulesRef !== null, "centerModules should exist")
-        compare(barContent.centerModulesRef.parent.parent, barContent.idleModulesRef,
-            "centerModules should be contained within idleModules")
+        compare(barContent.centerModulesRef.parent, barContent.idleModulesRef,
+            "centerModules should be a direct child of idleModules")
     }
 
     function test_surfaceStack_contains_all_loaders() {
@@ -70,21 +67,10 @@ TestCase {
         GlobalStates.samaelBluetoothMenuOpen = false
         GlobalStates.samaelRecorderOpen = false
 
+        // When idle (no surface open), dockExpanded is false and morphCloseness ≈ 1,
+        // so idleModules opacity = Math.pow(1, 1.3) ≈ 1
         compare(barContent.idleModulesRef.opacity, 1,
             "idleModules should be fully visible when surface === idle")
-        compare(barContent.surfaceStackRef.opacity, 0,
-            "surfaceStack should be hidden when surface === idle")
-    }
-
-    function test_crossfade_surface_when_open() {
-        GlobalStates.samaelClockDropOpen = true
-
-        compare(barContent.idleModulesRef.opacity, 0,
-            "idleModules should be hidden when surface is open")
-        compare(barContent.surfaceStackRef.opacity, 1,
-            "surfaceStack should be visible when surface is open")
-
-        GlobalStates.samaelClockDropOpen = false
     }
 
     // ── Asynchronous loading ──
@@ -106,7 +92,6 @@ TestCase {
 
     function test_loader_active_matches_global_flags() {
         // Verify each loader's active binding maps the correct flag
-        // (structural verification — bindings are QML expressions)
         compare(barContent.ldCalendarRef.active, GlobalStates.samaelClockDropOpen,
             "ldCalendar active should match samaClockDropOpen")
         compare(barContent.ldNotificationsMenuRef.active, GlobalStates.samaelNotificationsMenuOpen,
@@ -155,13 +140,10 @@ TestCase {
         verify(barContent.ldPopupIslandRef.sourceComponent !== null, "ldPopupIsland should have a sourceComponent")
     }
 
-    // ── centerModules still works after wrap ──
+    // ── centerModules still accessible after restructure ──
 
     function test_centerModules_accessible_from_controller() {
-        // The controller.idle entry should still resolve centerModules
         verify(barContent.controller !== undefined, "controller should exist")
-        // This validates that centerModules.implicitWidth/Height are still accessible
-        // even after the wrap
         verify(true, "centerModules wrapped correctly — controller idle entry works")
     }
 }

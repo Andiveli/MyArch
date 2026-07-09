@@ -111,8 +111,8 @@ Item {
     }
 
     Timer {
-        interval: 33
-        running: true
+        interval: 60
+        running: GlobalStates.barOpen || GlobalStates.samaelMediaControlsOpen
         repeat: true
         onTriggered: root._cavaTick++
     }

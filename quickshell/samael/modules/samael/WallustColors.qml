@@ -118,8 +118,8 @@ Singleton {
     }
 
     Timer {
-        interval: 1000
-        running: true
+        interval: 8000
+        running: GlobalStates.barOpen
         repeat: true
         onTriggered: wallustMtimeProc.check()
     }

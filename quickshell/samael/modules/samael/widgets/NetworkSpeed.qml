@@ -97,8 +97,8 @@ Item {
     }
 
     Timer {
-        interval: 1000
-        running: true
+        interval: 2000
+        running: GlobalStates.barOpen
         repeat: true
         onTriggered: root.updateSpeed()
     }

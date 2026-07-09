@@ -33,16 +33,18 @@ Item {
         }
     }
 
+    Keys.forwardTo: dropTabIndex === 1 ? [procAudio] : [metricsPane]
+
+    onDropTabIndexChanged: Qt.callLater(focusActiveTab)
+
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Tab && !event.modifiers) {
             dropTabIndex = (dropTabIndex + 1) % 2
-            Qt.callLater(root.focusActiveTab)
             event.accepted = true
             return
         }
         if (event.key === Qt.Key_Backtab) {
             dropTabIndex = (dropTabIndex + 1) % 2
-            Qt.callLater(root.focusActiveTab)
             event.accepted = true
             return
         }

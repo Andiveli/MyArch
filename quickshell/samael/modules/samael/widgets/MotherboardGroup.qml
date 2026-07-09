@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import qs
 import qs.modules.samael
+import qs.services   // SamaelSystemMonitor is now the single source of truth for CPU/mem/disk/temp
 
 Item {
     id: root
@@ -14,31 +15,34 @@ Item {
     property int barNavIndexDisk: 3
 
     function toggleMemDisplay() {
-root.memShowPercent = !root.memShowPercent
+        root.memShowPercent = !root.memShowPercent
     }
 
     function toggleDiskDisplay() {
-root.diskShowRatio = !root.diskShowRatio
-root.refreshDiskLabel()
+        root.diskShowRatio = !root.diskShowRatio
+        root.refreshDiskLabel()
     }
 
     function stepPowerProfile(delta) {
-root._stepPowerDelta = delta
-root._cyclePower = false
-pwrGetProc.running = false
-pwrGetProc.running = true
+        root._stepPowerDelta = delta
+        root._cyclePower = false
+        pwrGetProc.running = false
+        pwrGetProc.running = true
     }
 
-    property real cpuUsage: 0
-    property var _prevCpu: null
+    // ── Delegate to the single shared monitor (no more duplicate polling here) ──
+    readonly property real cpuUsage: SamaelSystemMonitor.cpuUsage
+    readonly property int memTotalKb: SamaelSystemMonitor.memTotalKb
+    readonly property int memUsedKb: SamaelSystemMonitor.memUsedKb
+    readonly property int diskPct: SamaelSystemMonitor.diskPct
+    readonly property string diskUsed: SamaelSystemMonitor.diskUsed
+    readonly property string diskTotal: SamaelSystemMonitor.diskTotal
+    readonly property real temperatureC: SamaelSystemMonitor.temperatureC
+    readonly property bool temperatureCritical: SamaelSystemMonitor.temperatureCritical
 
-    property int memTotalKb: 1
-    property int memUsedKb: 0
+    // Local display formatting only
     property bool memShowPercent: false
     property bool diskShowRatio: false
-    property string diskUsed: ""
-    property string diskTotal: ""
-    property int diskPct: 0
     property int _stepPowerDelta: 0
 
     Row {
@@ -98,8 +102,12 @@ pwrGetProc.running = true
             SamaelPaddedText {
                 id: tempText
                 anchors.centerIn: parent
-                property bool tempCritical: false
-                textColor: tempCritical ? WallustColors.temperatureCritical : WallustColors.moduleText
+                // Live from the single shared monitor (no local FileView / timer)
+                text: isNaN(SamaelSystemMonitor.temperatureC) ? "—°C 󰈸"
+                    : Math.round(SamaelSystemMonitor.temperatureC) + "°C 󰈸"
+                textColor: SamaelSystemMonitor.temperatureCritical
+                    ? WallustColors.temperatureCritical
+                    : WallustColors.moduleText
             }
             MouseArea {
                 anchors.fill: parent
@@ -135,6 +143,7 @@ pwrGetProc.running = true
             }
     }
 
+    // ── Label formatting (single definitions — no duplicates) ───────────
     function updateMemLabel() {
         if (root.memShowPercent) {
             const pct = Math.round(100 * root.memUsedKb / root.memTotalKb)
@@ -142,6 +151,18 @@ pwrGetProc.running = true
         } else {
             memBtn.text = (root.memUsedKb / (1024 * 1024)).toFixed(1) + "G 󰾆"
         }
+    }
+
+    function refreshDiskLabel() {
+        if (root.diskShowRatio && root.diskUsed.length && root.diskTotal.length)
+            diskText.text = root.diskUsed + "/" + root.diskTotal + " 󰋊"
+        else
+            diskText.text = root.diskPct + "% 󰋊"
+    }
+
+    Component.onCompleted: {
+        updateMemLabel()
+        refreshDiskLabel()
     }
 
     readonly property var powerCycle: ["performance", "balanced", "power-saver"]
@@ -192,114 +213,7 @@ pwrGetProc.running = true
         applyProfileAtIndex(profileIndex(current) + 1)
     }
 
-    FileView { id: fileStat; path: "/proc/stat" }
-    FileView { id: fileMeminfo; path: "/proc/meminfo" }
-
-    function pollCpu() {
-        fileStat.reload()
-        const line = fileStat.text().match(/^cpu\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)/m)
-        if (!line)
-            return
-        const stats = line.slice(1).map(Number)
-        const total = stats.reduce((a, b) => a + b, 0)
-        const idle = stats[3] + stats[4]
-        if (root._prevCpu) {
-            const dt = total - root._prevCpu.total
-            const di = idle - root._prevCpu.idle
-            if (dt > 0)
-                root.cpuUsage = 1 - di / dt
-        }
-        root._prevCpu = { total: total, idle: idle }
-    }
-
-    function pollMemory() {
-        fileMeminfo.reload()
-        const t = fileMeminfo.text()
-        root.memTotalKb = Number(t.match(/MemTotal:\s*(\d+)/)?.[1] ?? 1)
-        const avail = Number(t.match(/MemAvailable:\s*(\d+)/)?.[1] ?? 0)
-        root.memUsedKb = root.memTotalKb - avail
-        root.updateMemLabel()
-    }
-
-    onMemShowPercentChanged: root.updateMemLabel()
-
-    function readTemperature() {
-        for (const path of tempPaths) {
-            tempReader.path = path
-            tempReader.reload()
-            const raw = parseInt(tempReader.text().trim())
-            if (!isNaN(raw) && raw > 0) {
-                const c = raw >= 1000 ? raw / 1000.0 : raw
-                tempText.text = c.toFixed(0) + "°C 󰈸"
-                tempText.tempCritical = c >= 82
-                return
-            }
-        }
-        tempText.text = "—°C 󰈸"
-    }
-
-    readonly property var tempPaths: [
-        "/sys/class/hwmon/hwmon1/temp1_input",
-        "/sys/class/thermal/thermal_zone0/temp"
-    ]
-
-    FileView { id: tempReader; path: tempPaths[0] }
-
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.pollCpu()
-    }
-
-    Timer {
-        interval: 10000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.pollMemory()
-    }
-
-    Timer {
-        interval: 10000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: root.readTemperature()
-    }
-
-    function refreshDiskLabel() {
-        if (root.diskShowRatio && root.diskUsed.length && root.diskTotal.length)
-            diskText.text = root.diskUsed + "/" + root.diskTotal + " 󰋊"
-        else
-            diskText.text = root.diskPct + "% 󰋊"
-    }
-
-    Process {
-        id: diskProc
-        command: ["bash", "-c", "df -h / | tail -1 | awk '{print $5,$3,$2}'"]
-        stdout: SplitParser {
-            onRead: (data) => {
-                const parts = data.trim().split(/\s+/)
-                root.diskPct = parseInt(String(parts[0]).replace("%", "")) || 0
-                root.diskUsed = parts[1] || ""
-                root.diskTotal = parts[2] || ""
-                root.refreshDiskLabel()
-            }
-        }
-    }
-
-    Timer {
-        interval: 30000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            diskProc.running = false
-            diskProc.running = true
-        }
-    }
+    // ── LOCAL POWER PROFILE CONTROLS ONLY (no more CPU/mem/disk/temp polling here) ──
 
     Process {
         id: pwrGetProc
@@ -330,8 +244,8 @@ pwrGetProc.running = true
     }
 
     Timer {
-        interval: 5000
-        running: true
+        interval: 15000
+        running: GlobalStates.barOpen
         repeat: true
         triggeredOnStart: true
         onTriggered: {
@@ -339,5 +253,17 @@ pwrGetProc.running = true
             pwrGetProc.running = false
             pwrGetProc.running = true
         }
+    }
+
+    // ── React to data coming from the shared monitor ───────────────────
+    onMemShowPercentChanged: updateMemLabel()
+
+    Connections {
+        target: SamaelSystemMonitor
+        function onMemUsedKbChanged() { updateMemLabel() }
+        function onMemTotalKbChanged() { updateMemLabel() }
+        function onDiskUsedChanged() { refreshDiskLabel() }
+        function onDiskTotalChanged() { refreshDiskLabel() }
+        function onDiskPctChanged() { refreshDiskLabel() }
     }
 }

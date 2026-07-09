@@ -11,14 +11,10 @@ Scope {
     SamaelConnectionMenus {}
     SamaelSystemSidebarPanel {}
     SamaelSuperMenuPanel {}
-    SamaelNotificationIsland {}
     SamaelClockCalendarDrop {}
-    SamaelMediaManagerDrop {}
     SamaelMediaManagerPanel {}
-    SamaelPerformanceDrop {}
-    SamaelPerformanceDropPanel {}
     SamaelSessionMenu {}
-
+    
     PanelLoader { component: Background {} }
     PanelLoader { component: SamaelBar {} }
 }

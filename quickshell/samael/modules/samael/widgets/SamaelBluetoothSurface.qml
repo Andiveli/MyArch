@@ -16,6 +16,8 @@ SamaelPillSurface {
     implicitWidth: 320
     implicitHeight: 400
 
+    keyboardPanel: btMenu
+
     SamaelBluetoothMenu {
         id: btMenu
         anchors.fill: parent

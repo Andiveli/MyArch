@@ -16,6 +16,8 @@ SamaelPillSurface {
     implicitWidth: 540
     implicitHeight: 480
 
+    keyboardPanel: menu
+
     SamaelNotificationsMenu {
         id: menu
         anchors.fill: parent

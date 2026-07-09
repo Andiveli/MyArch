@@ -1,22 +1,23 @@
 pragma Singleton
-
+ 
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.modules.common
-
+import qs
+ 
 Singleton {
     id: root
-
+ 
     readonly property string configPath: Quickshell.shellPath("scripts/cava/samael_waybar.conf")
-
+ 
     property bool available: true
     property list<double> bars: []
-
+ 
     Process {
         id: cavaProcess
         command: ["cava", "-p", root.configPath]
-        running: true
+        // Only pay for cava when the bar (main visualizer) or media surfaces that use it are visible
+        running: GlobalStates.barOpen || GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing
         stdout: SplitParser {
             onRead: (data) => {
                 const trimmed = data.trim()

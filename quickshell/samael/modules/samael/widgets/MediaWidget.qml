@@ -18,8 +18,8 @@ Item {
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || "No media"
 
     Timer {
-        running: activePlayer?.playbackState === MprisPlaybackState.Playing
-        interval: Config.options.resources.updateInterval
+        running: GlobalStates.barOpen && activePlayer?.playbackState === MprisPlaybackState.Playing
+        interval: Math.max(1500, Config?.options?.resources?.updateInterval ?? 3000)
         repeat: true
         onTriggered: if (activePlayer) activePlayer.positionChanged()
     }
@@ -94,7 +94,18 @@ Item {
                     if (bar?.publishMediaDockAnchor)
                         bar.publishMediaDockAnchor()
                     publishMediaAnchor()
-                    GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen
+                    const willOpen = !GlobalStates.mediaControlsOpen
+                    if (willOpen) {
+                        if (typeof SamaelBarNavHub !== "undefined" && SamaelBarNavHub.saveCurrentHyprClient)
+                            SamaelBarNavHub.saveCurrentHyprClient()
+                    }
+                    GlobalStates.mediaControlsOpen = willOpen
+                    if (!willOpen) {
+                        Qt.callLater(() => {
+                            if (typeof SamaelBarNavHub !== "undefined" && SamaelBarNavHub.restoreHyprClientIfNeeded)
+                                SamaelBarNavHub.restoreHyprClientIfNeeded()
+                        })
+                    }
                 }
         }
     }

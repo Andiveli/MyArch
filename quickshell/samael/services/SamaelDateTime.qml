@@ -26,8 +26,8 @@ Item {
     property string uptime: "0h, 0m"
 
     Timer {
-        interval: 10
-        running: true
+        interval: Config?.options?.resources?.updateInterval ?? 3000
+        running: GlobalStates.barOpen
         repeat: true
         onTriggered: {
             fileUptime.reload();
@@ -48,7 +48,6 @@ Item {
             if (minutes > 0 || !formatted)
                 formatted += `${formatted ? ", " : ""}${minutes}m`;
             uptime = formatted;
-            interval = Config.options?.resources?.updateInterval ?? 3000;
         }
     }
 

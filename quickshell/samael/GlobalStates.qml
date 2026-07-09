@@ -73,6 +73,9 @@ Singleton {
     property int samaelBarFocus: 0 // 0 drawer .. 7 session
     property bool workspaceShowNumbers: false
 
+    // Saved Hyprland client address to restore after closing focus-stealing overlays (media, sidebars, menus, etc.)
+    property string hyprLastClientBeforeOverlay: ""
+
     onSidebarRightOpenChanged: {
         if (GlobalStates.sidebarRightOpen) {
             Notifications.timeoutAll();

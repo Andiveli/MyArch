@@ -22,32 +22,33 @@ QtObject {
 
     // ── Precedence ──────────────────────────────────────────────────────
 
-    /** Effective surface ID based on precedence (highest wins). */
-    readonly property string effectiveSurface: {
-        if (GlobalStates.wallpaperSelectorOpen)
-            return "wallpaper"
-        if (GlobalStates.sessionOpen)
-            return "power"
-        if (GlobalStates.samaelNotificationsMenuOpen)
-            return "notificationsMenu"
-        const mediaActive = GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing
-        const perfActive = GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing
-        if (mediaActive)
-            return "media"
-        if (perfActive)
-            return "performance"
-        if (GlobalStates.samaelWifiMenuOpen)
-            return "wifi"
-        if (GlobalStates.samaelBluetoothMenuOpen)
-            return "bluetooth"
-        if (GlobalStates.samaelClockDropOpen)
-            return "calendar"
-        if (GlobalStates.samaelRecorderOpen)
-            return "screenRecorder"
-        if (Notifications.popupList.length > 0 && !GlobalStates.screenLocked)
-            return "popupIsland"
-        return "idle"
-    }
+        /**
+         * Effective surface ID based on precedence (highest wins).
+         * Function-backed binding so GlobalStates changes re-evaluate reliably.
+         */
+        readonly property string effectiveSurface: computeEffectiveSurface()
+
+        function computeEffectiveSurface() {
+            if (GlobalStates.wallpaperSelectorOpen)
+                return "wallpaper"
+            if (GlobalStates.sessionOpen)
+                return "power"
+            if (GlobalStates.samaelNotificationsMenuOpen)
+                return "notificationsMenu"
+            if (GlobalStates.mediaControlsOpen || GlobalStates.samaelMediaClosing)
+                return "media"
+            if (GlobalStates.samaelPerformanceDropOpen || GlobalStates.samaelPerformanceClosing)
+                return "performance"
+            if (GlobalStates.samaelWifiMenuOpen)
+                return "wifi"
+            if (GlobalStates.samaelBluetoothMenuOpen)
+                return "bluetooth"
+            if (GlobalStates.samaelClockDropOpen)
+                return "calendar"
+            if (GlobalStates.samaelRecorderOpen)
+                return "screenRecorder"
+            return "idle"
+        }
 
     function isIdleSurface(surfaceId) {
         return surfaceId === "idle"
