@@ -24,16 +24,15 @@ Configs personales para replicar mi entorno en una máquina nueva.
 | `herdr-bin` | Gestor de tareas/herramientas |
 | `quickshell-git` | Samael shell |
 
-### Runtime (opcionales, según scripts de hypr)
+### Runtime (los que usás)
 
 | Paquete | Para qué |
 |---------|----------|
-| `wallust` | Temas basados en wallpaper |
-| `swww` | Wallpaper animated |
-| `wlogout` | Menú de sesión |
-| `rofi` | Lanzador/menús |
-| `waybar` | Barra de estado |
-| `dunst` / `swaync` | Notificaciones |
+| `wallust` *(AUR)* | Temas basados en wallpaper |
+| `awww` | Wallpaper animated (swww compatible) |
+
+> `awww` reemplaza a `swww` — instalás `awww` y si algún script espera `swww`, creás un symlink:
+> `ln -s /usr/bin/awww ~/.local/bin/swww`
 
 ## 🚀 Instalación en máquina nueva
 
