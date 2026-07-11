@@ -1,0 +1,18 @@
+id = "zellij-style-nav"
+name = "Zellij-style horizontal nav"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "alt+h/l: focus pane left/right, then previous/next tab at layout edge (Zellij MoveFocusOrTab)"
+platforms = ["linux", "macos"]
+
+[[actions]]
+id = "left"
+title = "Pane left or previous tab"
+contexts = ["global"]
+command = ["bash", "navigate-horizontal.sh", "left"]
+
+[[actions]]
+id = "right"
+title = "Pane right or next tab"
+contexts = ["global"]
+command = ["bash", "navigate-horizontal.sh", "right"]

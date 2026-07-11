@@ -1,0 +1,1 @@
+HOME = os.getenv("HOME")

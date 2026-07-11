@@ -1,0 +1,114 @@
+onboarding = false
+# herdr configuration managed by Gentleman.Dots.
+# This file is copied into ~/.config/herdr/config.toml during Home Manager activation.
+
+[theme]
+# Use a built-in dark theme with neutral foregrounds so Herdr does not inherit
+# Ghostty bright-black selected rows or Kanagawa's warm/yellow label text.
+name = "one-dark"
+
+[theme.custom]
+panel_bg = "#06080f"
+# Zellij zjstatus (work_kanagawa.kdl): tab_active rosa; inactivos legibles sobre terminal oscuro.
+tab_active_fg = "#ff0280"
+tab_inactive_fg = "#6c7086"
+# Match Pi's Gentle theme, with a muted cyan for Herdr chrome.
+accent = "#6FA0AF"
+green = "#B7CC85"
+blue = "#6FA0AF"
+red = "#CB7C94"
+yellow = "#DEBA87"
+
+[ui]
+accent = "#6FA0AF"
+# Crear tab al toque (alt+t) sin pedir nombre; Herdr usa nombres generados.
+prompt_new_tab_name = false
+# Sin botón "+" en la barra de tabs (nuevo tab: alt+t).
+show_tab_bar_new_tab_button = false
+
+agent_panel_sort = "spaces"
+[keys]
+# Keybindings siguiendo tu estilo (zellij/tmux/ghostty + directos).
+# prefix = alt+g
+#   prefix + ? → ver todos los atajos
+#   prefix + c → nuevo workspace
+#   prefix + d → borrar workspace
+# alt+w → menú/picker de workspaces
+#   (adentro: j/k para moverte, c y d via prefix)
+# alt + h/l + left/right → tabs
+# alt + j/k → agentes (previous/next)
+# alt + shift + h/l → panes horizontales
+# alt + n → pane lateral (split vertical)
+# etc.
+prefix = "alt+g"
+
+# --- Panes (dentro del tab actual) ---
+# Foco Herdr nativo: ctrl+alt+h/j/k/l (fiable en Linux; alt+shift a menudo no llega al TUI).
+# prefix+h/j/k/l = alt+g luego h/j/k/l. ctrl+h/j/k/l queda para nvim (sin plugin vim-herdr).
+# alt+[ / alt+] ciclan panes. alt+n split vertical.
+focus_pane_left = ["ctrl+alt+h", "prefix+h", "alt+shift+h"]
+focus_pane_down = ["ctrl+alt+j", "prefix+j", "alt+shift+j"]
+focus_pane_up = ["ctrl+alt+k", "prefix+k", "alt+shift+k"]
+focus_pane_right = ["ctrl+alt+l", "prefix+l", "alt+shift+l"]
+cycle_pane_next = "alt+]"
+cycle_pane_previous = "alt+["
+last_pane = "alt+;"
+
+split_vertical = "alt+n"
+split_horizontal = "alt+-"
+close_pane = "alt+x"
+# Zoom = pane a pantalla completa dentro del tab (equiv. zellij/tmux zoom). Toggle: misma tecla sale.
+# Herdr no tiene pane flotante tipo zellij; solo zoom en layout + overlays de plugins.
+zoom = ["alt+f", "alt+shift+f", "prefix+z", "ctrl+alt+f"]
+resize_mode = "alt+shift+r"
+toggle_sidebar = "alt+b"
+edit_scrollback = "alt+e"
+
+# Modo copia / selección tipo vim (como alt+v en zellij o prefix+[ en tmux)
+# Entra al modo con alt+v (o alt+g + [)
+# Dentro: hjkl, w/b/e, {} para moverte; v o Space inicia selección visual;
+# y o Enter para copiar; q o Esc para salir.
+# (Nota: búsqueda con / todavía no parece estar disponible en copy mode de Herdr)
+copy_mode = ["alt+v", "prefix+["]
+
+# --- Tabs ---
+# Fork nativo (focus_pane_or_tab_*): alt+h/l pane→tab. Solo con binario ~/.../herdr/target/release/herdr
+focus_pane_or_tab_left = "alt+h"
+focus_pane_or_tab_right = "alt+l"
+new_tab = "alt+t"
+rename_tab = ["alt+r", "ctrl+alt+r", "prefix+r"]
+close_tab = "alt+shift+x"
+previous_tab = ["alt+left", "alt+p"]
+next_tab = ["alt+right"]
+switch_tab = "alt+1..9"
+
+# --- Agents sidebar ---
+# alt+j / alt+k : previous/next agent
+# ctrl+num para saltar a un agente concreto (alt+num = tabs)
+previous_agent = "alt+k"
+next_agent = "alt+j"
+focus_agent = "ctrl+1..9"
+
+# --- Workspaces / misc ---
+# alt+w abre el menú/picker de workspaces (directo)
+# prefix (alt+g) + c = nuevo workspace
+# prefix + d = borrar workspace
+# j/k para navegar en el menú de workspaces (navigate mode)
+# alt+w necesita alt+w=ignore en Ghostty; respaldo prefix+w y ctrl+alt+w
+workspace_picker = ["alt+w", "prefix+w", "ctrl+alt+w"]
+new_workspace = "prefix+c"
+close_workspace = "prefix+d"
+rename_workspace = "alt+shift+w"
+goto = "prefix+g"
+detach = "alt+q"
+help = "prefix+?"
+
+navigate_workspace_up = "k"
+navigate_workspace_down = "j"
+
+# remote_image_paste left as default "ctrl+v" (remote only)
+
+# zellij-style-nav plugin deshabilitado: usar focus_pane_or_tab_* del fork (más rápido).
+
+[ui.toast]
+delivery = "system"

@@ -1,0 +1,207 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                            SAMAEL DOTS - GHOSTTY                             ║
+# ║                          Optimized for Neovim                                ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                                   FONT                                       │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+font-family = "JetBrainsMono Nerd Font"
+font-size = 14
+#font-feature = +calt
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                                  WINDOW                                      │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+background-opacity = 0.4
+background-blur-radius = 20
+window-decoration = false
+window-padding-color = extend
+window-padding-balance = true
+window-step-resize = false
+window-padding-balance = true
+window-height = 100
+window-width = 100
+
+# Tab bar: show names only when there are multiple tabs (auto-hide when single)
+window-show-tab-bar = auto
+
+# Tabs take only the width of their content (grouped to the left like a browser)
+# instead of stretching to fill the whole bar (Gnome-style).
+gtk-wide-tabs = false
+
+# GTK custom CSS for minimalist tabs
+gtk-custom-css = /home/samael/.config/ghostty/tabs-minimal.css
+
+# Quick Terminal: floating / drop-down (Quake-style) pane
+quick-terminal-position = center
+quick-terminal-size = 50%, 30%
+quick-terminal-animation-duration = 0.08
+
+mouse-hide-while-typing = true
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                                  SHADER                                      │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+custom-shader = shaders/cursor_smear_samael.glsl
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                            INPUT / KEYBINDINGS                               │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+# Split Management
+# Note: alt+v pasa a Zellij para scroll mode. Vim mode ahora en alt+shift+v.
+# Unbind alt+r/alt+d so they reach inner apps (zellij panes or herdr splits).
+# Matches muscle memory for "split right/down" inside the TUI (herdr/zellij handle their own splits).
+keybind = alt+r=ignore
+keybind = alt+d=ignore
+# alt+w → Herdr workspace_picker: must reach the PTY (ignore swallows; unbind passes through).
+keybind = alt+w=unbind
+
+# Split Navigation
+#keybind = alt+shift+k=goto_split:up
+#keybind = alt+shift+j=goto_split:down
+#keybind = alt+shift+h=goto_split:left
+#keybind = alt+shift+l=goto_split:right
+
+# Split Resize
+#keybind = ctrl+shift+j=resize_split:up,10
+#keybind = ctrl+shift+k=resize_split:down,10
+#keybind = ctrl+shift+h=resize_split:left,10
+#keybind = ctrl+shift+l=resize_split:right,10
+
+# Miscellaneous
+keybind = cmd+k=clear_screen
+keybind = shift+enter=text:\x1b\r
+
+# Navigation (tabs)
+# Nota: alt+h/l pasan a Zellij para MoveFocusOrTab
+# alt+shift+h/l pasan a Herdr (focus pane izq/der). Tabs en Herdr: alt+h/l.
+keybind = alt+shift+h=ignore
+keybind = alt+shift+j=ignore
+keybind = alt+shift+k=ignore
+keybind = alt+shift+l=ignore
+# alt+shift+t unbound so alt+shift+t can reach inner (herdr rename_tab, etc). Ghostty tab creation uses other means if needed.
+keybind = alt+shift+t=ignore
+keybind = alt+t=unbind
+        
+# Zellij: Alt + 1..9 cambia al tab N dentro de Zellij.
+# Ghostty por defecto intercepta alt+1..9 para sus propios tabs,
+# así que los ignoramos para que pasen a la terminal.
+keybind = alt+1=ignore
+keybind = alt+2=ignore
+keybind = alt+3=ignore
+keybind = alt+4=ignore
+keybind = alt+5=ignore
+keybind = alt+6=ignore
+keybind = alt+7=ignore
+keybind = alt+8=ignore
+keybind = alt+9=ignore
+
+# Quick Terminal (floating pane) - alt+f toggles a centered floating terminal
+# keybind = alt+f=toggle_quick_terminal
+
+
+# Open file with nvim (write 'nvim' first, then use this keybinding)
+keybind = alt+s=write_screen_file:paste
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                           VIM MODE (Mitchell's key table)                    │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+# Vim-mode keybindings for Ghostty.
+#
+# Note: We're missing a number of actions to produce a better vim experience.
+# This is what is possible today! But we plan on adding more actions to make
+# this even better in the future.
+
+# Entry point
+# Explicit unbind first to guarantee no other action (like old split) is on alt+shift+v,
+# then bind the vim table activation.
+keybind = alt+shift+v=unbind
+keybind = alt+shift+v=activate_key_table:vim
+keybind = alt+v=unbind
+
+# Key table definition
+keybind = vim/
+
+# Line movement
+# Note: scroll_page_lines:1 is very subtle in tall terminals.
+# Using 4 for clearly visible steps while still feeling "line by line".
+# Generate lots of output first (e.g. seq 1 300) to have scrollback to move through.
+keybind = vim/j=scroll_page_lines:4
+keybind = vim/k=scroll_page_lines:-4
+
+# Page movement
+keybind = vim/ctrl+d=scroll_page_down
+keybind = vim/ctrl+u=scroll_page_up
+keybind = vim/ctrl+f=scroll_page_down
+keybind = vim/ctrl+b=scroll_page_up
+keybind = vim/shift+j=scroll_page_down
+keybind = vim/shift+k=scroll_page_up
+
+# Jump to top/bottom
+keybind = vim/g>g=scroll_to_top
+keybind = vim/shift+g=scroll_to_bottom
+
+# Search (if you want vim-style search entry)
+keybind = vim/slash=start_search
+keybind = vim/n=navigate_search:next
+
+# Copy mode / selection
+# Note we're missing a lot of actions here to make this more full featured.
+keybind = vim/v=copy_to_clipboard
+keybind = vim/y=copy_to_clipboard
+
+# Command Palette
+keybind = vim/shift+semicolon=toggle_command_palette
+
+# Exit
+keybind = vim/escape=deactivate_key_table
+keybind = vim/q=deactivate_key_table
+keybind = vim/i=deactivate_key_table
+
+# Catch unbound keys
+keybind = vim/catch_all=ignore
+
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+# │                           SAMAEL THEME                                       │
+# └──────────────────────────────────────────────────────────────────────────────┘
+
+# --- Base Colors ---
+background = 06080f
+foreground = f3f6f9
+cursor-color = e0c15a
+selection-background = 263356
+selection-foreground = f3f6f9
+
+# --- Normal Colors ---
+palette = 0=#06080f
+palette = 1=#cb7c94
+palette = 2=#b7cc85
+palette = 3=#ffe066
+palette = 4=#7fb4ca
+palette = 5=#ff8dd7
+palette = 6=#7aa89f
+palette = 7=#f3f6f9
+
+# --- Bright Colors ---
+palette = 8=#8a8fa3
+palette = 9=#de8fa8
+palette = 10=#d1e8a9
+palette = 11=#fff7b1
+palette = 12=#a3d4d5
+palette = 13=#ffaeea
+palette = 14=#7fb4ca
+palette = 15=#f3f6f9
+
+confirm-close-surface = false
+linux-cgroup = never
+

@@ -1,0 +1,42 @@
+/* Ghostty - Compact left-aligned tab bar
+   Smaller height, tight padding, tabs packed to the left.
+*/
+
+tabbar,
+headerbar {
+  margin: 0;
+  padding: 0;
+}
+
+tabbar tabbox {
+  background-color: #06080f;
+  min-height: 13px;           /* much smaller bar */
+  padding: 0;
+  margin: 0;
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 9px;             /* smaller labels */
+  justify-content: start;     /* group tabs to the left */
+}
+
+tabbar tabbox tab {
+  color: #8a8fa3;
+  padding: 0 3px;             /* tight horizontal padding */
+  margin: 0;
+  border: none;
+  border-right: 1px solid #1a1c27;
+}
+
+tabbar tabbox tab:selected {
+  background-color: #0f121f;
+  color: #f3f6f9;
+  border-bottom: 1px solid #e0c15a;  /* subtle left accent */
+}
+
+tabbar tabbox tab label {
+  padding: 0;
+}
+
+/* optional: make inactive tabs even more compact */
+tabbar tabbox tab:hover {
+  background-color: #0a0c14;
+}

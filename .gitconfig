@@ -1,0 +1,11 @@
+[user]
+	email = andyvt0304@gmail.com
+	name = eSeylaA69
+[safe]
+	directory = /home/samael/Escritorio/Programacion/java/ChessPol
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
