@@ -1,0 +1,16 @@
+module samaelv2.widgets
+LoadingIndicator 1.0 LoadingIndicator.qml
+MediaCoverDisc 1.0 MediaCoverDisc.qml
+MediaLyricLine 1.0 MediaLyricLine.qml
+MediaWavyRing 1.0 MediaWavyRing.qml
+MediaControlButton 1.0 MediaControlButton.qml
+MediaWavySeekBar 1.0 MediaWavySeekBar.qml
+WifiSignalGlyph 1.0 WifiSignalGlyph.qml
+OverviewArcGauge 1.0 OverviewArcGauge.qml
+OverviewSmoothBar 1.0 OverviewSmoothBar.qml
+OverviewNetSparkline 1.0 OverviewNetSparkline.qml
+OverviewBatteryColumn 1.0 OverviewBatteryColumn.qml
+OverviewNetDualSparkline 1.0 OverviewNetDualSparkline.qml
+OverviewBottomRow 1.0 OverviewBottomRow.qml
+OverviewNetworkPanel 1.0 OverviewNetworkPanel.qml
+OverviewDiskCard 1.0 OverviewDiskCard.qml
