@@ -25,6 +25,9 @@ pokemon-colorscripts --no-title -s -r | fastfetch -c $HOME/.config/fastfetch/con
 # fastfetch. Will be disabled if above colorscript was chosen to install
 #fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc
 
+# Dotfiles bare repo
+alias dotfiles='git --git-dir=$HOME/dotfiles --work-tree=$HOME'
+
 # Set-up icons for files/directories in terminal using lsd
 alias ls='lsd'
 alias l='ls -l'
