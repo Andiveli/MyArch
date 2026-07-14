@@ -22,9 +22,11 @@ ShellRoot {
         ShellActions.toggleWifi = () => root.toggleSurface("", "wifi")
         ShellActions.toggleBluetooth = () => root.toggleSurface("", "bluetooth")
         ShellActions.toggleOverview = () => root.toggleRightSurface("", "overview")
+        ShellActions.togglePower = () => root.toggleRightSurface("", "power")
             ShellActions.toggleUsage = () => root.toggleSurface("", "usage")
         ShellActions.toggleLauncher = () => root.toggleSurface("", "launcher")
         ShellActions.toggleCalendar = () => root.toggleSurface("", "calendar")
+        ShellActions.toggleSettings = () => root.toggleSurface("", "settings")
         ShellActions.closeMiddleSurface = () => root.closeMiddleOnly()
         ShellActions.closeRightSurface = () => root.closeRightOnly()
     }
@@ -174,9 +176,21 @@ return
     }
 
     GlobalShortcut {
+        name: "samaelSettingsMenuToggle"
+        description: "samaelv2 settings (middle) — Hypr SUPER+CTRL+S"
+        onPressed: root.toggleSurface("", "settings")
+    }
+
+    GlobalShortcut {
         name: "samaelOverviewToggle"
         description: "samaelv2 system overview (right pill) — Hypr SUPER+SHIFT+O"
         onPressed: root.toggleRightSurface("", "overview")
+    }
+
+    GlobalShortcut {
+        name: "samaelPowerMenuToggle"
+        description: "samaelv2 power menu (right pill) — Hypr SUPER+SHIFT+P"
+        onPressed: root.toggleRightSurface("", "power")
     }
 
     GlobalShortcut {
@@ -215,8 +229,14 @@ return
         function openCalendar(): void { root.toggleSurface("", "calendar") }
         function calendar(): void { root.toggleSurface("", "calendar") }
         function toggleCalendar(): void { root.toggleSurface("", "calendar") }
+        function openSettings(): void { root.toggleSurface("", "settings") }
+        function settings(): void { root.toggleSurface("", "settings") }
+        function toggleSettings(): void { root.toggleSurface("", "settings") }
             function openOverview(): void { root.toggleRightSurface("", "overview") }
             function overview(): void { root.toggleRightSurface("", "overview") }
+            function openPower(): void { root.toggleRightSurface("", "power") }
+            function power(): void { root.toggleRightSurface("", "power") }
+            function togglePower(): void { root.toggleRightSurface("", "power") }
         function media(mon: string): void { root.toggleSurface(mon, "media") }
         function notifications(mon: string): void { root.toggleSurface(mon, "notifications") }
         function hide(): void { root.close() }
@@ -301,7 +321,6 @@ return
             readonly property bool rightOpen: root.openRightMon === modelData.name && root.openRightSurface.length > 0
             readonly property bool leftOpen: root.openLeftMon === modelData.name && root.openLeftSurface.length > 0
             readonly property bool modal: middleOpen || leftOpen || rightOpen
-
             visible: ShellConfig.barEnabled
             screen: modelData
             color: "transparent"
@@ -377,7 +396,7 @@ return
                         return ShellConfig.barMarginTop
                             + (barStripHeight - middleRestSlotH) / 2
                     }
-                    readonly property real rightY: rightPill.overviewVisible
+                    readonly property real rightY: (rightPill.overviewVisible || rightPill.powerVisible)
                                 ? ShellConfig.barMarginTop
                                 : ShellConfig.barMarginTop + (barStripHeight - rightRestSlotH) / 2
                     readonly property real leftY: ShellConfig.barMarginTop
@@ -385,7 +404,7 @@ return
 
                     LeftPill {
                         id: leftPill
-                        barScreen: modelData
+                        barScreen: overlay.modelData
                         surface: root.openLeftMon === modelData.name ? root.openLeftSurface : ""
                         x: ShellConfig.barMarginLeft
                         y: focusScope.leftY
@@ -396,11 +415,13 @@ return
                     x: Math.max(0, (focusScope.width - width) / 2)
                     y: focusScope.middleY
                     surface: overlay.surface
+                    barScreen: overlay.modelData
                 }
 
                 RightPill {
                     id: rightPill
                     screenName: modelData.name
+                    barScreen: overlay.modelData
                     surface: root.openRightMon === modelData.name ? root.openRightSurface : ""
                     x: Math.max(0, focusScope.width - width - ShellConfig.barMarginRight)
                     y: focusScope.rightY

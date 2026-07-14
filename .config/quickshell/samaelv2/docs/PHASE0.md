@@ -14,7 +14,7 @@ qs -c samaelv2
 - **`launcher`**: middle surface app search (`.desktop` scan). Super release → Hypr `quickshell:samaelLauncherToggle`; `qs -c samaelv2 ipc call samaelv2 openLauncher`. Config: `launcher.pinned`, `middle.surfaces.launcher` size (drives morph).
 - **`cava`**: while widget is in JSON, **`cava` process stays on** (PipeWire — all system audio, not only MPRIS). See Engram #1344 P2. **Idle CPU:** this subprocess is usually the gap vs “0% qs” unixporn posts — remove `cava` from `bar.right` if you want near-idle CPU (widget gone too).
 - **`clock`**: updates every **30s** (not 1 Hz) when in bar.
-- **`middle.surfaces`**: target size per surface name (first: `media`).
+- **`middle.surfaces`**: target size per surface name (first: `media`). **`settings`**: config editor (Caelestia-style nav, Wallust, vim). Open: `SUPER+CTRL+S` → `samaelSettingsMenuToggle`, or `qs -c samaelv2 ipc call samaelv2 openSettings`. (`SUPER+SHIFT+S` = screenshot in Hypr `keybinds.lua`.) Save with **s** writes `config.json` (ShellConfig hot-reloads).
 - **`style`**: `cornerRadius`, `sectionBottomMargin`.
 - **`left.surfaces` / `middle.surfaces`**: pill morph sizes when open.
 - **`style`**: chrome, section margins, **innerMarginLeftAll**, **innerMarginMiddleSides**, **innerMarginRightBeforeContent**.

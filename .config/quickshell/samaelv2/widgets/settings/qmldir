@@ -1,0 +1,6 @@
+module settings
+SettingsConnectedRow 1.0 SettingsConnectedRow.qml
+SettingsSectionHeader 1.0 SettingsSectionHeader.qml
+SettingsNavRow 1.0 SettingsNavRow.qml
+SettingsToggleRow 1.0 SettingsToggleRow.qml
+SettingsStepperRow 1.0 SettingsStepperRow.qml

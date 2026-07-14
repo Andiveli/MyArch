@@ -3,6 +3,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
+// Startup + save path: FileView can lag; disk read keeps bar.enabled in sync.
+
 Item {
     id: root
 
@@ -69,6 +71,8 @@ Item {
                 return Qt.size(540, 400)
             if (name === "calendar")
                 return Qt.size(500, 320)
+            if (name === "settings")
+                return Qt.size(720, 440)
             return Qt.size(320, root.middleRestHeight)
         }
         return Qt.size(s.width ?? 320, s.height ?? 200)
@@ -103,6 +107,7 @@ Item {
                 right: ["notifications", "separator", "cava", "media"]
             },
             left: { surfaces: { notifications: { width: 360, height: 280 } } },
+            right: { surfaces: { power: { width: 72, height: 232 } } },
                 middle: {
                     restHeight: 30,
                     surfaces: {
@@ -125,6 +130,15 @@ Item {
         return fallback
     }
 
+    /** Deep clone of merged config for settings editor draft. */
+    function cloneConfig() {
+        try {
+            return JSON.parse(JSON.stringify(_cfg))
+        } catch (e) {
+            return defaultConfig()
+        }
+    }
+
     FileView {
         id: configFile
         path: Quickshell.shellPath("config.json")
@@ -139,5 +153,38 @@ Item {
         onFileChanged: reload()
     }
 
-    Component.onCompleted: configFile.reload()
+    function reloadFromDisk() {
+        configFile.reload()
+    }
+
+    /** Apply saved/parsed config immediately (FileView reload alone can lag). */
+    function applyConfigObject(obj) {
+        if (!obj || typeof obj !== "object")
+            return
+        try {
+            root._cfg = Object.assign(defaultConfig(), JSON.parse(JSON.stringify(obj)))
+        } catch (e) {
+            console.warn("ShellConfig.applyConfigObject failed", e)
+        }
+    }
+
+    Process {
+        id: bootReadProc
+        stdout: StdioCollector { id: bootReadOut }
+        onExited: (exitCode) => {
+            if (exitCode !== 0 || !(bootReadOut.text || "").trim().length)
+                return
+            try {
+                root.applyConfigObject(JSON.parse(bootReadOut.text))
+            } catch (e) { }
+        }
+    }
+
+    Component.onCompleted: {
+        configFile.reload()
+        const py = Quickshell.shellPath("scripts/config-read.py")
+        const path = Quickshell.shellPath("config.json")
+        bootReadProc.command = ["python3", py, path]
+        bootReadProc.running = true
+    }
 }

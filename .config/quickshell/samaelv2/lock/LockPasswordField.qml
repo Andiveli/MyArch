@@ -67,7 +67,7 @@ Item {
 
     function bindCharRowWidth() {
         rowWidthBehavior.enabled = false
-        charRow.implicitWidth = Qt.binding(() => charRowFullWidth)
+        charRow.width = Qt.binding(() => charRowFullWidth)
         rowWidthBehavior.enabled = true
     }
 
@@ -80,7 +80,7 @@ Item {
             if (next > prev)
                 Qt.callLater(fieldRoot.bindCharRowWidth)
             else if (next === 0)
-                charRow.implicitWidth = charRow.implicitWidth
+                charRow.width = charRowFullWidth
         }
     }
 
@@ -154,15 +154,14 @@ Item {
                 Row {
                     id: charRow
                     anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: implicitWidth > fieldClip.width
-                        ? -(implicitWidth - fieldClip.width) / 2 : 0
+                    anchors.horizontalCenterOffset: width > fieldClip.width
+                        ? -(width - fieldClip.width) / 2 : 0
                     spacing: charGap
                     height: glyphRowH
-                    implicitHeight: glyphRowH
-                    implicitWidth: charRowFullWidth
+                    width: charRowFullWidth
                     visible: buffer.length > 0
 
-                    Behavior on implicitWidth {
+                    Behavior on width {
                         id: rowWidthBehavior
                         NumberAnimation {
                             duration: Motion.morph

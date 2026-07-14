@@ -53,6 +53,7 @@ RowLayout {
         case "media":
         case "mpris": return "../widgets/MediaWidget.qml"
         case "overview": return "../widgets/OverviewWidget.qml"
+        case "power": return "../widgets/PowerWidget.qml"
         default: return ""
         }
     }

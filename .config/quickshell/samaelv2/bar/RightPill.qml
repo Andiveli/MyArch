@@ -15,6 +15,7 @@ Item {
 
     property string screenName: ""
     property string surface: ""
+    property var barScreen: null
 
     readonly property int padH: ShellConfig.innerMarginRightBeforeContent
     readonly property int padTop: ShellConfig.sectionPadTopCompact
@@ -24,6 +25,7 @@ Item {
 
     readonly property bool surfaceOpen: surface.length > 0
     readonly property bool overviewVisible: surfaceOpen && surface === "overview"
+    readonly property bool powerVisible: surfaceOpen && surface === "power"
 
     readonly property bool toastActive: NotifsService.popups.length > 0
     readonly property bool osdActive: OsdService.visibleOnMonitor(screenName)
@@ -31,8 +33,9 @@ Item {
 
     readonly property string mode: combinedVisible ? "combined"
         : (overviewVisible ? "overview"
+        : (powerVisible ? "power"
         : (osdActive ? "osd"
-        : (toastActive ? "toast" : "rest")))
+        : (toastActive ? "toast" : "rest"))))
 
     readonly property real restInnerW: Math.max(restHost.implicitWidth, 48)
     readonly property real restInnerH: Math.max(restHost.implicitHeight, Style.barContentHeight)
@@ -68,6 +71,13 @@ Item {
             const o = ldOverview.item
             if (o && o.implicitWidth > 0)
                 return Qt.size(Math.max(sz.width, o.implicitWidth), Math.max(sz.height, o.implicitHeight))
+            return Qt.size(sz.width, sz.height)
+        }
+        if (mode === "power") {
+            const sz = ShellConfig.rightSurfaceSize("power")
+            const p = ldPower.item
+            if (p && p.implicitWidth > 0)
+                return Qt.size(Math.max(sz.width, p.implicitWidth), Math.max(sz.height, p.implicitHeight))
             return Qt.size(sz.width, sz.height)
         }
         return Qt.size(restInnerW, restInnerH)
@@ -138,7 +148,7 @@ Item {
             widgetIds: ShellConfig.barRight
             spacing: 6
             anchors.centerIn: parent
-            opacity: (mode === "rest" && !overviewVisible) ? Math.pow(morphCloseness, 1.5) : 0
+            opacity: (mode === "rest" && !overviewVisible && !powerVisible) ? Math.pow(morphCloseness, 1.5) : 0
             visible: opacity > 0.02
             enabled: mode === "rest"
         }
@@ -163,6 +173,27 @@ Item {
                 oItem.morphCloseness = Qt.binding(() => pill.morphCloseness)
                 if (pill.overviewVisible)
                     Qt.callLater(() => oItem.forceActiveFocus())
+            }
+        }
+
+        Loader {
+            id: ldPower
+            x: 0
+            y: 0
+            width: parent.width
+            height: parent.height
+            active: pill.powerVisible
+            source: "../surfaces/PowerMenuSurface.qml"
+            onLoaded: bindPower(item)
+            onActiveChanged: if (active && item) bindPower(item)
+
+            function bindPower(pItem) {
+                if (!pItem)
+                    return
+                pItem.open = Qt.binding(() => pill.powerVisible)
+                pItem.morphCloseness = Qt.binding(() => pill.morphCloseness)
+                if (pill.powerVisible)
+                    Qt.callLater(() => pItem.forceActiveFocus())
             }
         }
 

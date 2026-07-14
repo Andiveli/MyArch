@@ -2,6 +2,7 @@ singleton Motion Motion.qml
 singleton WallustColors WallustColors.qml
 singleton Style Style.qml
 singleton ShellConfig ShellConfig.qml
+singleton ShellConfigService ShellConfigService.qml
 singleton CavaService CavaService.qml
 singleton StringUtils StringUtils.qml
 singleton MprisPlayers MprisPlayers.qml
@@ -21,3 +22,4 @@ singleton CodexBarService CodexBarService.qml
 singleton LauncherService LauncherService.qml
 singleton CalendarService CalendarService.qml
 singleton LockService LockService.qml
+singleton PowerSession PowerSession.qml

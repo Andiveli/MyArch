@@ -9,9 +9,11 @@ Item {
     property var toggleWifi: null
     property var toggleBluetooth: null
     property var toggleOverview: null
+    property var togglePower: null
     property var toggleUsage: null
     property var toggleLauncher: null
     property var toggleCalendar: null
+    property var toggleSettings: null
     property var closeMiddleSurface: null
     property var closeRightSurface: null
     /** Measured from reserve MiddleIdle (pill handoff). */
