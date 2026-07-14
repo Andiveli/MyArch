@@ -7,57 +7,74 @@
     "marginTop": 8,
     "marginLeft": 12,
     "marginRight": 12,
-    "left": ["workspaces"],
-    "middle": ["launcher", "separator", "ai", "separator", "clock"],
-    "right": ["overview", "separator", "notifications", "separator", "wifi", "separator", "bluetooth", "separator", "cava", "media"]
-  },
-  "right": {
-    "surfaces": {
-      "overview": { "width": 580, "height": 248 }
-    }
+    "left": [
+      "workspaces"
+    ],
+    "middle": [
+      "ai",
+      "separator",
+      "clock"
+    ],
+    "right": [
+      "notifications",
+      "separator",
+      "cava",
+      "media",
+      "separator",
+      "power"
+    ]
   },
   "left": {
     "surfaces": {
-      "notifications": { "width": 360, "height": 280 }
+      "notifications": {
+        "width": 360,
+        "height": 280
+      }
     }
   },
-  "launcher": {
-    "pinned": []
-  },
-  "lyrics": {
-    "dir": "",
-    "backend": "Auto",
-    "panelWidth": 220,
-    "timeOffsetSec": 0
-  },
-  "wallpaper": {
-    "dir": "/home/samael/Pictures/wallpapers"
+  "right": {
+    "surfaces": {
+      "power": {
+        "width": 72,
+        "height": 232
+      }
+    }
   },
   "middle": {
     "restHeight": 30,
     "surfaces": {
-      "media": { "width": 760, "height": 260 },
-      "wallpaper": { "width": 920, "height": 132 },
-      "wifi": { "width": 360, "height": 340 },
-      "bluetooth": { "width": 360, "height": 340 },
-      "notifications": { "width": 360, "height": 340 },
-      "usage": { "width": 360, "height": 280 },
-      "launcher": { "width": 540, "height": 400 },
-      "calendar": { "width": 500, "height": 320 }
+      "media": {
+        "width": 520,
+        "height": 200
+      },
+      "wallpaper": {
+        "width": 920,
+        "height": 132
+      },
+      "wifi": {
+        "width": 360,
+        "height": 340
+      },
+      "notifications": {
+        "width": 360,
+        "height": 340
+      },
+      "launcher": {
+        "width": 540,
+        "height": 400
+      },
+      "calendar": {
+        "width": 500,
+        "height": 300
+      },
+      "settings": {
+        "width": 720,
+        "height": 440
+      }
     }
   },
   "style": {
     "cornerRadius": 14,
-    "sectionBottomMargin": 2,
-    "sectionPadH": 10,
-    "sectionPadTop": 6,
-    "sectionPadBottom": 4,
-    "sectionPadTopCompact": 2,
-    "sectionPadBottomCompact": 2,
-    "innerMarginLeftAll": 10,
-    "innerMarginMiddleSides": 11,
-    "innerMarginRightBeforeContent": 8,
-    "mediaBarTitleMaxWidth": 120,
-    "colorsFile": "../qml_color.json"
+    "sectionBottomMargin": 3
   }
 }

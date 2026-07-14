@@ -10,6 +10,8 @@ Item {
     id: pill
 
     property string surface: ""
+    /** Optional; used by shell overlay (workspaces / future glass). */
+    property var barScreen: null
 
     readonly property int padH: ShellConfig.innerMarginMiddleSides
     readonly property int padTop: ShellConfig.sectionPadTopCompact
@@ -26,8 +28,9 @@ Item {
     readonly property bool usageVisible: surfaceOpen && surface === "usage"
     readonly property bool launcherVisible: surfaceOpen && surface === "launcher"
     readonly property bool calendarVisible: surfaceOpen && surface === "calendar"
+    readonly property bool settingsVisible: surfaceOpen && surface === "settings"
     readonly property string mode: wallpaperVisible ? "wallpaper"
-        : (mediaVisible ? "media" : (notifVisible ? "notifications" : (wifiVisible ? "wifi" : (btVisible ? "bluetooth" : (usageVisible ? "usage" : (launcherVisible ? "launcher" : (calendarVisible ? "calendar" : "rest")))))))
+        : (mediaVisible ? "media" : (notifVisible ? "notifications" : (wifiVisible ? "wifi" : (btVisible ? "bluetooth" : (usageVisible ? "usage" : (launcherVisible ? "launcher" : (calendarVisible ? "calendar" : (settingsVisible ? "settings" : "rest"))))))))
 
     readonly property real restInnerW: Math.max(restHost.implicitWidth, 48)
     readonly property real restInnerH: Math.max(restHost.implicitHeight, Style.barContentHeight)
@@ -74,6 +77,11 @@ Item {
                     const c = ldCalendar.item
                     if (c && c.implicitHeight > 0)
                         return Qt.size(Math.max(sz.width, c.implicitWidth), Math.max(sz.height, c.implicitHeight))
+                }
+                if (mode === "settings") {
+                    const s = ldSettings.item
+                    if (s && s.implicitHeight > 0)
+                        return Qt.size(Math.max(sz.width, s.implicitWidth), Math.max(sz.height, s.implicitHeight))
                 }
                 return Qt.size(sz.width, sz.height)
 
@@ -161,7 +169,7 @@ Item {
             widgetIds: ShellConfig.barMiddle
             spacing: 6
             anchors.centerIn: parent
-            opacity: (mediaVisible || wallpaperVisible || notifVisible || wifiVisible || btVisible || usageVisible || launcherVisible || calendarVisible) ? 0 : Math.pow(morphCloseness, 1.5)
+            opacity: (mediaVisible || wallpaperVisible || notifVisible || wifiVisible || btVisible || usageVisible || launcherVisible || calendarVisible || settingsVisible) ? 0 : Math.pow(morphCloseness, 1.5)
             visible: opacity > 0.02
             enabled: mode === "rest"
         }
@@ -291,6 +299,24 @@ Item {
                         cItem.morphCloseness = Qt.binding(() => pill.morphCloseness)
                         if (pill.calendarVisible)
                             Qt.callLater(() => cItem.forceActiveFocus())
+                    }
+                }
+
+                Loader {
+                    id: ldSettings
+                    anchors.fill: parent
+                    active: pill.settingsVisible
+                    source: "../surfaces/SettingsSurface.qml"
+                    onLoaded: bindSettings(item)
+                    onActiveChanged: if (active && item) bindSettings(item)
+
+                    function bindSettings(sItem) {
+                        if (!sItem)
+                            return
+                        sItem.open = Qt.binding(() => pill.settingsVisible)
+                        sItem.morphCloseness = Qt.binding(() => pill.morphCloseness)
+                        if (pill.settingsVisible)
+                            Qt.callLater(() => sItem.forceActiveFocus())
                     }
                 }
 
