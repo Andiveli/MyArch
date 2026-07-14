@@ -17,3 +17,7 @@ singleton OsdService OsdService.qml
 singleton AudioLevelService AudioLevelService.qml
 singleton WallsService WallsService.qml
 singleton LyricsService LyricsService.qml
+singleton CodexBarService CodexBarService.qml
+singleton LauncherService LauncherService.qml
+singleton CalendarService CalendarService.qml
+singleton LockService LockService.qml

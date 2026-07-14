@@ -112,30 +112,5 @@ Item {
         onFileChanged: root.reloadPaletteFromDisk()
     }
 
-    Timer {
-        interval: 1000
-        running: ShellConfig.barEnabled
-        repeat: true
-        onTriggered: wallustMtimeProc.check()
-    }
-
-    Process {
-        id: wallustMtimeProc
-        property int lastMtime: 0
-        function check() {
-            exec(["stat", "-c", "%Y", "/home/samael/.config/waybar/wallust/colors-waybar.css"])
-        }
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const m = parseInt(text.trim(), 10)
-                if (!isNaN(m) && wallustMtimeProc.lastMtime > 0 && m > wallustMtimeProc.lastMtime)
-                    root.reloadPaletteFromDisk()
-                if (!isNaN(m))
-                    wallustMtimeProc.lastMtime = m
-            }
-        }
-        Component.onCompleted: check()
-    }
-
     Component.onCompleted: reloadPaletteFromDisk()
 }

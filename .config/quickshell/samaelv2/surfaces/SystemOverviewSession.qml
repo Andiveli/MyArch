@@ -41,6 +41,10 @@ Item {
     property real batteryPct: 1
     property bool batteryCharging: false
 
+    property var topCpuProcesses: []
+    property var topMemProcesses: []
+    property int procsRevision: 0
+
     property var _prevCpu: null
     property var _prevNet: null
 
@@ -180,6 +184,49 @@ Item {
             gpuProc.running = true
             batProc.running = false
             batProc.running = true
+            procsProc.running = false
+            procsProc.running = true
+        }
+    }
+
+    Process {
+        id: procsProc
+        command: ["bash", Quickshell.shellPath("scripts/overview-top-procs.sh")]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const cpu = []
+                const mem = []
+                let group = ""
+                const lines = String(text).trim().split("\n")
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim()
+                    if (line === "---CPU---") {
+                        group = "cpu"
+                        continue
+                    }
+                    if (line === "---MEM---") {
+                        group = "mem"
+                        continue
+                    }
+                    if (!line.length || !group.length)
+                        continue
+                    const p = line.split("|")
+                    if (p.length < 3)
+                        continue
+                    const row = {
+                        name: p[0],
+                        cpuPct: parseFloat(p[1]) || 0,
+                        memPct: parseFloat(p[2]) || 0
+                    }
+                    if (group === "cpu")
+                        cpu.push(row)
+                    else
+                        mem.push(row)
+                }
+                root.topCpuProcesses = cpu
+                root.topMemProcesses = mem
+                root.procsRevision++
+            }
         }
     }
 

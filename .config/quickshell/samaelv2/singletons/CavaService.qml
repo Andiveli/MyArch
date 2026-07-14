@@ -4,6 +4,10 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
+/**
+ * Cava visualizer — always on while widget is in bar (Engram #1344 P2).
+ * Captures PipeWire sink (YouTube, games, Discord), not only MPRIS players.
+ */
 Item {
     id: root
 

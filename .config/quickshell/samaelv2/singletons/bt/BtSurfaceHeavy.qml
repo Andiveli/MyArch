@@ -361,6 +361,9 @@ Item {
         if (!adapter)
             return
         adapter.enabled = !adapter.enabled
+        // Persist intentional power so shell restart does not fight the user.
+        if (typeof BtSurfaceLogic !== "undefined" && BtSurfaceLogic.rememberPower)
+            BtSurfaceLogic.rememberPower(adapter.enabled === true)
         if (!adapter.enabled && adapter.discovering)
             adapter.discovering = false
         if (!adapter.enabled) {

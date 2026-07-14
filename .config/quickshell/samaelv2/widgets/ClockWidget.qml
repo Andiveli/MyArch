@@ -11,7 +11,7 @@ Text {
     readonly property string clockGlyph: "\uf017"
 
     Timer {
-        interval: 1000
+        interval: 30000
         running: ShellConfig.barEnabled && ShellConfig.hasWidgetAnywhere("clock")
         repeat: true
         triggeredOnStart: true

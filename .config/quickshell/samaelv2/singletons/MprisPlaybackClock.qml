@@ -15,6 +15,8 @@ QtObject {
 
     readonly property var player: MprisPlayers.activePlayer
     readonly property bool _pollActive: ShellActions.mediaPanelOpen && player != null
+            && (player.playbackState === MprisPlaybackState.Playing
+                || player.playbackState === MprisPlaybackState.Paused)
 
     property real _anchorPos: 0
     property real _anchorMs: 0
@@ -108,9 +110,10 @@ QtObject {
     property Timer _lengthPoll: Timer {
         interval: 350
         repeat: true
-            running: root._pollActive
-            onTriggered: MprisPlayers.refreshActiveTrackLength()
-
+        running: root._pollActive
+                && root.player
+                && root.player.playbackState !== MprisPlaybackState.Stopped
+        onTriggered: MprisPlayers.refreshActiveTrackLength()
     }
 
     property Timer _pausePoll: Timer {

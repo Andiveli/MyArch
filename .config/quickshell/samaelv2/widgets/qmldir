@@ -14,3 +14,6 @@ OverviewNetDualSparkline 1.0 OverviewNetDualSparkline.qml
 OverviewBottomRow 1.0 OverviewBottomRow.qml
 OverviewNetworkPanel 1.0 OverviewNetworkPanel.qml
 OverviewDiskCard 1.0 OverviewDiskCard.qml
+OverviewProcsPanel 1.0 OverviewProcsPanel.qml
+OverviewProcColumn 1.0 OverviewProcColumn.qml
+OverviewTrafficBar 1.0 OverviewTrafficBar.qml

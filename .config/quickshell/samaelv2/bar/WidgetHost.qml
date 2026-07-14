@@ -43,6 +43,7 @@ RowLayout {
         switch (id) {
         case "workspaces": return "../widgets/WorkspacesWidget.qml"
         case "ai": return "../widgets/AiWidget.qml"
+        case "launcher": return "../widgets/LauncherWidget.qml"
         case "notifications": return "../widgets/NotificationsIconWidget.qml"
         case "separator": return "../widgets/BarSeparator.qml"
         case "clock": return "../widgets/ClockWidget.qml"

@@ -28,12 +28,12 @@ Rectangle {
             font.weight: Font.DemiBold
             color: WallustColors.moduleText
         }
-        OverviewSmoothBar {
+        OverviewTrafficBar {
             Layout.fillWidth: true
             barRadius: 4
             implicitHeight: 8
             fraction: SystemOverviewLogic.diskPct / 100
-            fillColor: Qt.rgba(0.45, 0.82, 0.62, 0.9)
+            trackOpacity: 0.12
         }
         Text {
             visible: SystemOverviewLogic.diskUsed.length > 0

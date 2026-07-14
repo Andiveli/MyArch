@@ -23,8 +23,11 @@ Item {
     readonly property bool notifVisible: surfaceOpen && surface === "notifications"
     readonly property bool wifiVisible: surfaceOpen && surface === "wifi"
     readonly property bool btVisible: surfaceOpen && surface === "bluetooth"
+    readonly property bool usageVisible: surfaceOpen && surface === "usage"
+    readonly property bool launcherVisible: surfaceOpen && surface === "launcher"
+    readonly property bool calendarVisible: surfaceOpen && surface === "calendar"
     readonly property string mode: wallpaperVisible ? "wallpaper"
-        : (mediaVisible ? "media" : (notifVisible ? "notifications" : (wifiVisible ? "wifi" : (btVisible ? "bluetooth" : "rest"))))
+        : (mediaVisible ? "media" : (notifVisible ? "notifications" : (wifiVisible ? "wifi" : (btVisible ? "bluetooth" : (usageVisible ? "usage" : (launcherVisible ? "launcher" : (calendarVisible ? "calendar" : "rest")))))))
 
     readonly property real restInnerW: Math.max(restHost.implicitWidth, 48)
     readonly property real restInnerH: Math.max(restHost.implicitHeight, Style.barContentHeight)
@@ -57,6 +60,21 @@ Item {
                     if (b && b.implicitHeight > 0)
                         return Qt.size(Math.max(sz.width, b.implicitWidth), Math.max(sz.height, b.implicitHeight))
                 }
+                if (mode === "usage") {
+                    const u = ldUsage.item
+                    if (u && u.implicitHeight > 0)
+                        return Qt.size(Math.max(sz.width, u.implicitWidth), Math.max(sz.height, u.implicitHeight))
+                }
+                if (mode === "launcher") {
+                    const l = ldLauncher.item
+                    if (l && l.implicitHeight > 0)
+                        return Qt.size(Math.max(sz.width, l.implicitWidth), Math.max(sz.height, l.implicitHeight))
+                }
+                if (mode === "calendar") {
+                    const c = ldCalendar.item
+                    if (c && c.implicitHeight > 0)
+                        return Qt.size(Math.max(sz.width, c.implicitWidth), Math.max(sz.height, c.implicitHeight))
+                }
                 return Qt.size(sz.width, sz.height)
 
         }
@@ -76,7 +94,12 @@ Item {
 
     readonly property real morphCloseness: {
         const d = Math.max(Math.abs(width - targetW), Math.abs(height - targetH))
-        return d < 0.5 ? 1 : (1 - Math.min(1, d / 110))
+        if (d < 0.5)
+            return 1
+        const span = Math.max(110,
+            Math.abs(targetW - restInnerW),
+            Math.abs(targetH - restInnerH))
+        return 1 - Math.min(1, d / span)
     }
 
     Behavior on width {
@@ -138,7 +161,7 @@ Item {
             widgetIds: ShellConfig.barMiddle
             spacing: 6
             anchors.centerIn: parent
-            opacity: (mediaVisible || wallpaperVisible || notifVisible || wifiVisible || btVisible) ? 0 : Math.pow(morphCloseness, 1.5)
+            opacity: (mediaVisible || wallpaperVisible || notifVisible || wifiVisible || btVisible || usageVisible || launcherVisible || calendarVisible) ? 0 : Math.pow(morphCloseness, 1.5)
             visible: opacity > 0.02
             enabled: mode === "rest"
         }
@@ -214,6 +237,60 @@ Item {
                         bItem.morphCloseness = Qt.binding(() => pill.morphCloseness)
                         if (pill.btVisible)
                             Qt.callLater(() => bItem.forceActiveFocus())
+                    }
+                }
+
+                Loader {
+                    id: ldUsage
+                    anchors.fill: parent
+                    active: pill.usageVisible
+                    source: "../surfaces/UsageSurface.qml"
+                    onLoaded: bindUsage(item)
+                    onActiveChanged: if (active && item) bindUsage(item)
+
+                    function bindUsage(uItem) {
+                        if (!uItem)
+                            return
+                        uItem.open = Qt.binding(() => pill.usageVisible)
+                        uItem.morphCloseness = Qt.binding(() => pill.morphCloseness)
+                        if (pill.usageVisible)
+                            Qt.callLater(() => uItem.forceActiveFocus())
+                    }
+                }
+
+                Loader {
+                    id: ldLauncher
+                    anchors.fill: parent
+                    active: pill.launcherVisible
+                    source: "../surfaces/LauncherSurface.qml"
+                    onLoaded: bindLauncher(item)
+                    onActiveChanged: if (active && item) bindLauncher(item)
+
+                    function bindLauncher(lItem) {
+                        if (!lItem)
+                            return
+                        lItem.open = Qt.binding(() => pill.launcherVisible)
+                        lItem.morphCloseness = Qt.binding(() => pill.morphCloseness)
+                        if (pill.launcherVisible)
+                            Qt.callLater(() => lItem.forceActiveFocus())
+                    }
+                }
+
+                Loader {
+                    id: ldCalendar
+                    anchors.fill: parent
+                    active: pill.calendarVisible
+                    source: "../surfaces/CalendarSurface.qml"
+                    onLoaded: bindCalendar(item)
+                    onActiveChanged: if (active && item) bindCalendar(item)
+
+                    function bindCalendar(cItem) {
+                        if (!cItem)
+                            return
+                        cItem.open = Qt.binding(() => pill.calendarVisible)
+                        cItem.morphCloseness = Qt.binding(() => pill.morphCloseness)
+                        if (pill.calendarVisible)
+                            Qt.callLater(() => cItem.forceActiveFocus())
                     }
                 }
 

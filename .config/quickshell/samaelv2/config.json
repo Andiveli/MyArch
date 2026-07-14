@@ -1,11 +1,14 @@
 {
+  "lock": {
+    "previewUi": false
+  },
   "bar": {
     "enabled": true,
     "marginTop": 8,
     "marginLeft": 12,
     "marginRight": 12,
     "left": ["workspaces"],
-    "middle": ["ai", "separator", "clock"],
+    "middle": ["launcher", "separator", "ai", "separator", "clock"],
     "right": ["overview", "separator", "notifications", "separator", "wifi", "separator", "bluetooth", "separator", "cava", "media"]
   },
   "right": {
@@ -17,6 +20,9 @@
     "surfaces": {
       "notifications": { "width": 360, "height": 280 }
     }
+  },
+  "launcher": {
+    "pinned": []
   },
   "lyrics": {
     "dir": "",
@@ -34,7 +40,10 @@
       "wallpaper": { "width": 920, "height": 132 },
       "wifi": { "width": 360, "height": 340 },
       "bluetooth": { "width": 360, "height": 340 },
-      "notifications": { "width": 360, "height": 340 }
+      "notifications": { "width": 360, "height": 340 },
+      "usage": { "width": 360, "height": 280 },
+      "launcher": { "width": 540, "height": 400 },
+      "calendar": { "width": 500, "height": 320 }
     }
   },
   "style": {

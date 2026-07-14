@@ -5,7 +5,7 @@ import Caelestia.Config
 import Caelestia.Services
 
 /** Caelestia paths + optional hook for other surfaces (panel mirrors samael Lyrics.setTrack). */
-QtObject {
+Item {
     id: root
 
     function applyPathsFromConfig() {
@@ -26,5 +26,15 @@ QtObject {
     function indexForTime(t) { return Lyrics.indexForTime(t) }
     function timeForIndex(i) { return Lyrics.timeForIndex(i) }
 
-    Component.onCompleted: applyPathsFromConfig()
+    Component.onCompleted: {
+        applyPathsFromConfig()
+        Qt.callLater(applyPathsFromConfig)
+    }
+
+    Timer {
+        interval: 400
+        running: true
+        repeat: false
+        onTriggered: root.applyPathsFromConfig()
+    }
 }

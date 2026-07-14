@@ -10,13 +10,25 @@ qs -c samaelv2
 
 - **`bar.enabled`**: show top bar (`false` = no panels, no widgets, no cava process, no wallust poll).
 - **`bar.left` / `bar.middle` / `bar.right`**: widget id lists.
-- Widget ids: `workspaces`, `ai`, `notifications`, `separator`, `clock`, `cava`, `media` (alias `mpris`). Only ids listed in a zone are loaded (lazy `Loader`).
+- Widget ids: `workspaces`, `launcher`, `ai`, `notifications`, `separator`, `clock`, `cava`, `media` (alias `mpris`). Only ids listed in a zone are loaded (lazy `Loader`).
+- **`launcher`**: middle surface app search (`.desktop` scan). Super release → Hypr `quickshell:samaelLauncherToggle`; `qs -c samaelv2 ipc call samaelv2 openLauncher`. Config: `launcher.pinned`, `middle.surfaces.launcher` size (drives morph).
+- **`cava`**: while widget is in JSON, **`cava` process stays on** (PipeWire — all system audio, not only MPRIS). See Engram #1344 P2. **Idle CPU:** this subprocess is usually the gap vs “0% qs” unixporn posts — remove `cava` from `bar.right` if you want near-idle CPU (widget gone too).
+- **`clock`**: updates every **30s** (not 1 Hz) when in bar.
 - **`middle.surfaces`**: target size per surface name (first: `media`).
 - **`style`**: `cornerRadius`, `sectionBottomMargin`.
 - **`left.surfaces` / `middle.surfaces`**: pill morph sizes when open.
 - **`style`**: chrome, section margins, **innerMarginLeftAll**, **innerMarginMiddleSides**, **innerMarginRightBeforeContent**.
 - **Keybinds are NOT in JSON** — Hyprland + `qs ipc call samaelv2 …` only.
 - **Focus**: overlay always on (middle visible at idle); input mask is middle rect when collapsed, full screen when media/notifications open. Reserve never takes keyboard focus.
+
+## OSD volume / brightness (idle CPU)
+
+- No 24/7 `wpctl` / sysfs loops — poll only during a short burst when OSD shows or when IPC is called.
+- Optional after `Volume.sh` / `Brightness.sh` (keeps bar OSD in sync with keybinds):
+  ```sh
+  qs -c samaelv2 ipc call samaelv2 osdVolume
+  qs -c samaelv2 ipc call samaelv2 osdBrightness
+  ```
 
 ## IPC (keyboard hooks via Hyprland `exec`)
 

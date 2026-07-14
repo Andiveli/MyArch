@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell.Services.Mpris
+import Caelestia.Services
 import "../singletons"
 import "../widgets"
 
@@ -18,6 +19,20 @@ FocusScope {
     property real morphCloseness: 1
 
     readonly property var player: MprisPlayers.activePlayer
+
+    /** Preload Lyrics while media is open (samael: setTrack before lyrics column toggled). */
+    readonly property var _lyricsWarm: {
+        if (!open)
+            return
+        LyricsService.applyPathsFromConfig()
+        const p = player
+        if (!p)
+            return
+        const len = trackLengthSec
+        Lyrics.setTrack(p.trackArtist, p.trackTitle, p.trackAlbum,
+            len > 0 ? len : (p.lengthSupported ? Number(p.length) : 0))
+    }
+
     /** Drives re-bind when MprisPlaybackClock polls / interpolates (position is not reactive). */
     readonly property int _playbackTick: MprisPlaybackClock.tick
     readonly property real trackLengthSec: {
@@ -396,6 +411,7 @@ FocusScope {
         onOpenChanged: {
             ShellActions.mediaPanelOpen = open
             if (open) {
+                LyricsService.applyPathsFromConfig()
                 MprisPlaybackClock.nudgeTiming()
                 if (player)
                     MprisLengthProbe.forceRequest(player)

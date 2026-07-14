@@ -31,7 +31,8 @@ Item {
 
     readonly property string mode: combinedVisible ? "combined"
         : (overviewVisible ? "overview"
-        : (toastActive ? "toast" : (osdActive ? "osd" : "rest")))
+        : (osdActive ? "osd"
+        : (toastActive ? "toast" : "rest")))
 
     readonly property real restInnerW: Math.max(restHost.implicitWidth, 48)
     readonly property real restInnerH: Math.max(restHost.implicitHeight, Style.barContentHeight)
@@ -60,6 +61,8 @@ Item {
         }
         if (mode === "toast")
             return Qt.size(toastW, toastInnerH)
+        if (mode === "osd")
+            return Qt.size(OsdService.desiredW, restInnerH)
         if (mode === "overview") {
             const sz = ShellConfig.rightSurfaceSize("overview")
             const o = ldOverview.item
@@ -217,8 +220,11 @@ Item {
         OsdBarContent {
             id: osdContent
             z: 2
+            anchors.fill: parent
             enabled: mode === "osd"
             visible: mode === "osd"
+            opacity: mode === "osd" ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: Motion.fast } }
             kind: OsdService.kind
             level: OsdService.barLevel
             muted: OsdService.muted

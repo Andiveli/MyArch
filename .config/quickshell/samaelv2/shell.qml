@@ -7,9 +7,14 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import "singletons"
 import "bar"
+import "lock"
 
 ShellRoot {
     id: root
+
+    Lock {
+        id: sessionLockHost
+    }
 
     Component.onCompleted: {
         ShellActions.toggleMedia = () => root.toggleSurface("", "media")
@@ -17,6 +22,9 @@ ShellRoot {
         ShellActions.toggleWifi = () => root.toggleSurface("", "wifi")
         ShellActions.toggleBluetooth = () => root.toggleSurface("", "bluetooth")
         ShellActions.toggleOverview = () => root.toggleRightSurface("", "overview")
+            ShellActions.toggleUsage = () => root.toggleSurface("", "usage")
+        ShellActions.toggleLauncher = () => root.toggleSurface("", "launcher")
+        ShellActions.toggleCalendar = () => root.toggleSurface("", "calendar")
         ShellActions.closeMiddleSurface = () => root.closeMiddleOnly()
         ShellActions.closeRightSurface = () => root.closeRightOnly()
     }
@@ -124,6 +132,12 @@ return
     }
 
     GlobalShortcut {
+        name: "samaelLauncherToggle"
+        description: "samaelv2 app launcher (middle) — Hypr Super release"
+        onPressed: root.toggleSurface("", "launcher")
+    }
+
+    GlobalShortcut {
         name: "mediaControlsToggle"
         description: "samaelv2 media pill (middle)"
         onPressed: root.toggleSurface("", "media")
@@ -148,6 +162,18 @@ return
     }
 
     GlobalShortcut {
+        name: "samaelUsageMenuToggle"
+        description: "samaelv2 CodexBar usage menu (middle) — Hypr SUPER+SHIFT+A"
+        onPressed: root.toggleSurface("", "usage")
+    }
+
+    GlobalShortcut {
+        name: "samaelCalendarMenuToggle"
+        description: "samaelv2 calendar (middle) — Hypr SUPER+SHIFT+D"
+        onPressed: root.toggleSurface("", "calendar")
+    }
+
+    GlobalShortcut {
         name: "samaelOverviewToggle"
         description: "samaelv2 system overview (right pill) — Hypr SUPER+SHIFT+O"
         onPressed: root.toggleRightSurface("", "overview")
@@ -165,6 +191,12 @@ return
         onPressed: root.wallpaperRandom()
     }
 
+    GlobalShortcut {
+        name: "samaelv2Lock"
+        description: "samaelv2 session lock"
+        onPressed: sessionLockHost.requestLock()
+    }
+
     Process { id: randomWallProc }
 
     IpcHandler {
@@ -175,6 +207,14 @@ return
         function wifi(): void { root.toggleSurface("", "wifi") }
         function openBluetooth(): void { root.toggleSurface("", "bluetooth") }
         function bluetooth(): void { root.toggleSurface("", "bluetooth") }
+        function openUsage(): void { root.toggleSurface("", "usage") }
+        function usage(): void { root.toggleSurface("", "usage") }
+        function openLauncher(): void { root.toggleSurface("", "launcher") }
+        function launcher(): void { root.toggleSurface("", "launcher") }
+        function toggleLauncher(): void { root.toggleSurface("", "launcher") }
+        function openCalendar(): void { root.toggleSurface("", "calendar") }
+        function calendar(): void { root.toggleSurface("", "calendar") }
+        function toggleCalendar(): void { root.toggleSurface("", "calendar") }
             function openOverview(): void { root.toggleRightSurface("", "overview") }
             function overview(): void { root.toggleRightSurface("", "overview") }
         function media(mon: string): void { root.toggleSurface(mon, "media") }
@@ -182,12 +222,24 @@ return
         function hide(): void { root.close() }
         function page(mon: string, name: string): void { root.toggleSurface(mon, name) }
         function wallpaper(): void { root.toggleWallpaper() }
+        function osdVolume(level: string): void { OsdService.pulseVolume(level) }
+        function osdBrightness(pct: string): void { OsdService.pulseBrightness(pct) }
     }
 
     IpcHandler {
         target: "wallpaperSelector"
         function toggle(): void { root.toggleWallpaper() }
         function random(): void { root.wallpaperRandom() }
+    }
+
+    IpcHandler {
+        target: "lock"
+        function activate(): void { sessionLockHost.requestLock() }
+        function lock(): void { sessionLockHost.requestLock() }
+        function unlock(): void { sessionLockHost.requestUnlock() }
+        function isLocked(): bool { return sessionLockHost.isLocked() }
+        function preview(): void { sessionLockHost.previewActive = true }
+        function closePreview(): void { sessionLockHost.previewActive = false }
     }
 
     Variants {
@@ -304,7 +356,7 @@ return
                         if (!overlay.modal || event.key !== Qt.Key_Escape)
                             return
                         // Wallpaper picker owns Esc (field → strip → clear → close)
-                        if (overlay.surface === "wallpaper" || overlay.surface === "notifications" || overlay.surface === "wifi" || overlay.surface === "bluetooth")
+                        if (overlay.surface === "wallpaper" || overlay.surface === "notifications" || overlay.surface === "wifi" || overlay.surface === "bluetooth" || overlay.surface === "usage")
                             return
                         root.close()
                         event.accepted = true

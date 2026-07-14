@@ -3,7 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/** Sink level via wpctl (matches Volume.sh / pamixer on Pipewire). */
+/** Sink level via wpctl — on demand; Hypr scripts can push level instantly via IPC. */
 Singleton {
     id: root
 
@@ -13,13 +13,31 @@ Singleton {
 
     signal levelChanged()
 
+    function setFromHypr(pct, isMuted) {
+        const p = Math.max(0, Math.min(150, parseInt(pct, 10)))
+        if (isNaN(p))
+            return
+        root.muted = !!isMuted
+        root.volume = root.muted ? 0 : Math.min(1, p / 100.0)
+        root.lastPct = root.muted ? 0 : p
+    }
+
+    function poll() {
+        wpctlProc.exec()
+    }
+
     Process {
-        command: ["sh", "-c", "while true; do wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null || echo '0.0'; sleep 0.25; done"]
-        running: true
-        stdout: SplitParser {
-            onRead: line => {
-                const d = line.trim()
-                root.muted = d.indexOf("[MUTED]") >= 0
+        id: wpctlProc
+        command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
+        function exec() {
+            running = false
+            running = true
+        }
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const d = String(text).trim()
+                if (!d.length)
+                    return
                 const m = d.match(/[0-9.]+/)
                 if (!m)
                     return
@@ -27,12 +45,15 @@ Singleton {
                 if (isNaN(f))
                     return
                 const pct = Math.round(f * 100)
-                const prev = root.lastPct
+                const wasMuted = root.muted
+                root.muted = d.indexOf("[MUTED]") >= 0
                 root.volume = Math.max(0, Math.min(1, f))
-                if (prev >= 0 && pct !== prev)
+                if (root.lastPct < 0 || pct !== root.lastPct || wasMuted !== root.muted)
                     root.levelChanged()
                 root.lastPct = pct
             }
         }
     }
+
+    Component.onCompleted: poll()
 }

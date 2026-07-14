@@ -6,6 +6,9 @@ import Quickshell.Io
 Item {
     id: root
 
+    /** true = lock IPC/shortcut open UI overlay only (no WlSessionLock). Set false for real lock. */
+    /** false = real WlSessionLock; true = overlay preview only (Esc closes, no PAM). */
+    readonly property bool lockPreviewUi: _cfg.lock?.previewUi === true
     readonly property bool barEnabled: _cfg.bar?.enabled !== false
     readonly property int barMarginTop: _cfg.bar?.marginTop ?? 8
     readonly property int barMarginLeft: _cfg.bar?.marginLeft ?? 12
@@ -36,6 +39,8 @@ Item {
         readonly property string lyricsBackend: _cfg.lyrics?.backend ?? "Auto"
         readonly property int lyricsPanelWidth: _cfg.lyrics?.panelWidth ?? 220
         readonly property real lyricsTimeOffsetSec: _cfg.lyrics?.timeOffsetSec ?? 0
+        readonly property var launcherPinned: _list(_cfg.launcher?.pinned, [])
+
         readonly property string lyricsDirExpanded: {
             const d = lyricsDir.trim()
             if (!d.length)
@@ -59,8 +64,13 @@ Item {
 
     function surfaceSize(name) {
         const s = middleSurfaces[name]
-        if (!s)
+        if (!s) {
+            if (name === "launcher")
+                return Qt.size(540, 400)
+            if (name === "calendar")
+                return Qt.size(500, 320)
             return Qt.size(320, root.middleRestHeight)
+        }
         return Qt.size(s.width ?? 320, s.height ?? 200)
     }
 
@@ -82,6 +92,7 @@ Item {
 
     function defaultConfig() {
         return {
+            lock: { previewUi: false },
             bar: {
                 enabled: true,
                 marginTop: 8,
@@ -98,9 +109,12 @@ Item {
                         media: { width: 520, height: 200 },
                         wallpaper: { width: 920, height: 132 },
                         wifi: { width: 360, height: 340 },
-                        notifications: { width: 360, height: 340 }
+                        notifications: { width: 360, height: 340 },
+                        launcher: { width: 540, height: 400 },
+                        calendar: { width: 500, height: 300 }
                     }
                 },
+
             style: { cornerRadius: 14, sectionBottomMargin: 3 }
         }
     }

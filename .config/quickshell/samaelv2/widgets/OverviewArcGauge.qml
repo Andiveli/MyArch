@@ -2,7 +2,7 @@ import QtQuick
 import "../singletons"
 
 /**
- * Speedometer: 270° track, tick marks, needle; traffic color (33% / 66%).
+ * Speedometer: 270° track, tick marks, needle; Wallust traffic gradient (same as OverviewTrafficBar).
  */
 Item {
     id: root
@@ -23,14 +23,28 @@ Item {
 
     property real displayValue: value01
 
-    readonly property color trafficColor: {
-        const p = displayValue
-        if (p < 0.33)
-            return Qt.rgba(0.42, 0.82, 0.52, 1)
-        if (p < 0.66)
-            return Qt.rgba(0.95, 0.78, 0.22, 1)
-        return Qt.rgba(0.92, 0.32, 0.28, 1)
+    readonly property color stopGreen: WallustColors.teal
+    readonly property color stopYellow: WallustColors.yellow
+    readonly property color stopRed: WallustColors.red
+
+    /** Color at load fraction 0…1 (matches OverviewTrafficBar). */
+    function trafficAt(f) {
+        const t = Math.max(0, Math.min(1, f))
+        if (t <= 0.5) {
+            const u = t / 0.5
+            return Qt.rgba(
+                stopGreen.r + (stopYellow.r - stopGreen.r) * u,
+                stopGreen.g + (stopYellow.g - stopGreen.g) * u,
+                stopGreen.b + (stopYellow.b - stopGreen.b) * u, 1)
+        }
+        const u = (t - 0.5) / 0.5
+        return Qt.rgba(
+            stopYellow.r + (stopRed.r - stopYellow.r) * u,
+            stopYellow.g + (stopRed.g - stopYellow.g) * u,
+            stopYellow.b + (stopRed.b - stopYellow.b) * u, 1)
     }
+
+    readonly property color trafficColor: trafficAt(displayValue)
 
     Behavior on displayValue {
         NumberAnimation {
@@ -41,7 +55,6 @@ Item {
 
     onValue01Changed: displayValue = value01
 
-    /** Pivot lifted so the full arc fits above the icon. */
     readonly property real _cx: width / 2
     readonly property real _cy: height * 0.62
     readonly property real _r: Math.min(width * 0.42, height * 0.5)
@@ -63,26 +76,26 @@ Item {
             const cy = root._cy
             const r = root._r
             const v = Math.max(0, Math.min(1, root.displayValue))
-            const col = root.trafficColor
             const tickColor = Qt.rgba(WallustColors.moduleText.r, WallustColors.moduleText.g,
                 WallustColors.moduleText.b, 0.42)
 
             drawTicks(ctx, cx, cy, r, tickColor)
-
             drawArc(ctx, cx, cy, r, root.startAngle, root.spanAngle, root.trackColor, root.lineWidth)
+
             if (v > 0.002)
-                drawArc(ctx, cx, cy, r, root.startAngle, root.spanAngle * v, col, root.lineWidth)
+                drawGradientArc(ctx, cx, cy, r, root.startAngle, root.spanAngle * v, root.lineWidth)
 
             const angleDeg = root.startAngle + root.spanAngle * v
             const rad = angleDeg * Math.PI / 180
             const tipR = r * 0.88
             const tipX = cx + tipR * Math.cos(rad)
             const tipY = cy + tipR * Math.sin(rad)
+            const needleCol = root.trafficAt(v)
 
             ctx.beginPath()
             ctx.moveTo(cx, cy)
             ctx.lineTo(tipX, tipY)
-            ctx.strokeStyle = col
+            ctx.strokeStyle = needleCol
             ctx.lineWidth = 2.2
             ctx.lineCap = "round"
             ctx.stroke()
@@ -92,7 +105,7 @@ Item {
             ctx.fillStyle = Qt.rgba(WallustColors.moduleText.r, WallustColors.moduleText.g,
                 WallustColors.moduleText.b, 0.35)
             ctx.fill()
-            ctx.strokeStyle = col
+            ctx.strokeStyle = needleCol
             ctx.lineWidth = 1.2
             ctx.stroke()
         }
@@ -131,6 +144,19 @@ Item {
             const end = (startDeg + sweepDeg) * Math.PI / 180
             ctx.arc(cx, cy, r, start, end, false)
             ctx.stroke()
+        }
+
+        /** Filled sweep colored by load fraction along full gauge range (0…1). */
+        function drawGradientArc(ctx, cx, cy, r, startDeg, sweepDeg, lw) {
+            const steps = Math.max(8, Math.ceil(Math.abs(sweepDeg) / 6))
+            const stepSweep = sweepDeg / steps
+            const fullSpan = root.spanAngle
+            for (let i = 0; i < steps; i++) {
+                const segStart = startDeg + stepSweep * i
+                const loadFrac = (segStart + stepSweep * 0.5 - root.startAngle) / fullSpan
+                const col = root.trafficAt(Math.max(0, Math.min(1, loadFrac)))
+                drawArc(ctx, cx, cy, r, segStart, stepSweep, col, lw)
+            }
         }
 
         onWidthChanged: requestPaint()

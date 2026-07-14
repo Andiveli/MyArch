@@ -40,6 +40,10 @@ Singleton {
     readonly property real batteryPct: _session ? _session.batteryPct : 1
     readonly property bool batteryCharging: _session ? _session.batteryCharging : false
 
+    readonly property var topCpuProcesses: _session ? _session.topCpuProcesses : []
+    readonly property var topMemProcesses: _session ? _session.topMemProcesses : []
+    readonly property int procsRevision: _session ? _session.procsRevision : 0
+
     readonly property var _session: sessionLoader.item
     readonly property int _sessionRev: sessionLoader.status
 

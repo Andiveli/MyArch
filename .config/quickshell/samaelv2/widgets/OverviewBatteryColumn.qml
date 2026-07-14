@@ -12,9 +12,31 @@ Item {
     implicitWidth: 44
     implicitHeight: parent ? parent.height : 160
 
-    readonly property color liquid: Qt.rgba(0.42, 0.78, 0.48, 1)
-    readonly property color liquidDim: Qt.rgba(0.32, 0.58, 0.38, 0.85)
-    readonly property color liquidHighlight: Qt.rgba(0.55, 0.92, 0.62, 0.45)
+    readonly property color stopFull: WallustColors.teal
+    readonly property color stopMid: WallustColors.yellow
+    readonly property color stopEmpty: WallustColors.red
+
+    /** Inverted vs load bars: high charge = teal, low = red (same Wallust stops as OverviewTrafficBar). */
+    function chargeColorAt(level01) {
+        const t = Math.max(0, Math.min(1, level01))
+        if (t >= 0.5) {
+            const u = (t - 0.5) / 0.5
+            return Qt.rgba(
+                stopMid.r + (stopFull.r - stopMid.r) * u,
+                stopMid.g + (stopFull.g - stopMid.g) * u,
+                stopMid.b + (stopFull.b - stopMid.b) * u, 1)
+        }
+        const u = t / 0.5
+        return Qt.rgba(
+            stopEmpty.r + (stopMid.r - stopEmpty.r) * u,
+            stopEmpty.g + (stopMid.g - stopEmpty.g) * u,
+            stopEmpty.b + (stopMid.b - stopEmpty.b) * u, 1)
+    }
+
+    readonly property color liquid: chargeColorAt(level01)
+    readonly property color liquidDim: Qt.rgba(liquid.r, liquid.g, liquid.b, 0.88)
+    readonly property color liquidHighlight: Qt.rgba(
+        Math.min(1, liquid.r + 0.1), Math.min(1, liquid.g + 0.1), Math.min(1, liquid.b + 0.06), 0.5)
 
     readonly property real level01: {
         const l = level
@@ -25,7 +47,9 @@ Item {
         return Math.max(0, Math.min(1, l))
     }
     readonly property real fillFrac: available ? level01 : 0
-    readonly property color fillColor: charging ? liquid : liquidDim
+    readonly property color fillColor: charging
+        ? Qt.rgba(Math.min(1, liquid.r + 0.06), Math.min(1, liquid.g + 0.04), liquid.b, 1)
+        : liquidDim
 
     /** 0 = crest at left wall, 1 = crest at right wall (ping-pong). */
     property real travel: 0
@@ -75,7 +99,8 @@ Item {
             anchors.topMargin: 2
             anchors.bottom: parent.bottom
             radius: 8
-            color: Qt.rgba(0, 0, 0, 0.22)
+            color: Qt.rgba(WallustColors.moduleBackground.r, WallustColors.moduleBackground.g,
+                WallustColors.moduleBackground.b, 0.55)
             border.width: 2
             border.color: Qt.rgba(WallustColors.moduleText.r, WallustColors.moduleText.g,
                 WallustColors.moduleText.b, 0.28)
@@ -172,6 +197,7 @@ Item {
                     function onTravelChanged() { liquidCanvas.requestPaint() }
                     function onFillFracChanged() { liquidCanvas.requestPaint() }
                     function onFillColorChanged() { liquidCanvas.requestPaint() }
+                    function onLiquidChanged() { liquidCanvas.requestPaint() }
                 }
                 onWidthChanged: requestPaint()
                 onHeightChanged: requestPaint()
@@ -189,7 +215,7 @@ Item {
                     text: "\uf0e7"
                     font.family: Style.fontFamily
                     font.pixelSize: 12
-                    color: Qt.rgba(0.95, 0.88, 0.35, 1)
+                    color: WallustColors.yellow
                 }
 
                 Text {

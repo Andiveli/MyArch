@@ -1,2 +1,6 @@
 # Local Pi runtime state
 .atl/
+state/
+
+# Google Calendar iCal secret URLs — never commit
+calendar-secrets.json

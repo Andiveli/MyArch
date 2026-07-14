@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import Quickshell.Services.Mpris
@@ -7,10 +9,8 @@ import "../singletons"
 import "../widgets"
 
 /**
- * samael Lyrics wiring + Apple-ish scroll + per-word highlight (approximation).
- *
- * Track metadata changes (new song, title resolving after player connects) are
- * detected via side-effect binding (readonly property var _), matching samael ref.
+ * Lyrics column — same flow as samael SamaelLyricList / caelestia LyricList:
+ * binding setTrack, state machine (loading → hasLyrics | noLyrics), flag on hasLyricsChanged.
  */
 Item {
     id: root
@@ -18,48 +18,105 @@ Item {
     property bool active: true
     readonly property var player: MprisPlayers.activePlayer
 
-    readonly property var lyricList: Lyrics.lyrics
-    readonly property bool hasLyrics: Lyrics.hasLyrics
-    readonly property bool loading: Lyrics.loading
-    readonly property real edgeFade: 0.12
+    readonly property real fadeAmount: 0.1
+    property bool flag
+    readonly property list<string> lyricList: Lyrics.lyrics
 
     readonly property real playbackSec: {
         MprisPlaybackClock.tick
         return MprisPlaybackClock.positionSec
     }
 
-    /**
-     * Guard: _ skips the first evaluation (runs during construction before config
-     * is applied). Component.onCompleted applies config then sets _ready = true,
-     * triggering a real _ evaluation with correct paths.
-     */
-    property bool _ready: false
-
-    /** Side-effect binding: re-evaluates when player or track metadata changes (ref: samael SamaelLyricList). */
-    readonly property var _: {
-        if (!_ready) return
+    function trackDurationSec() {
         const p = player
+        if (!p)
+            return 0
+        const len = MprisPlayers.getTrackLengthSec(p)
+        if (len > 0)
+            return len
+        const raw = Number(p.length)
+        if (isFinite(raw) && raw > 0 && p.lengthSupported)
+            return raw
+        return 0
+    }
+
+    function syncLyricsTrack() {
+        LyricsService.applyPathsFromConfig()
+        const p = player
+        if (!p || !root.active) {
+            Lyrics.clearTrack()
+            return
+        }
+        Lyrics.setTrack(p.trackArtist, p.trackTitle, p.trackAlbum, trackDurationSec())
+    }
+
+    // Caelestia "funny binding hack" — re-runs when player/metadata changes
+    readonly property var _: {
+        flag
+        MprisPlayers.timingRevision
+        trackDurationSec()
+        const p = player
+        if (!root.active) {
+            return
+        }
         if (p)
-            Lyrics.setTrack(p.trackArtist, p.trackTitle, p.trackAlbum, p.length)
+            Lyrics.setTrack(p.trackArtist, p.trackTitle, p.trackAlbum, trackDurationSec())
         else
             Lyrics.clearTrack()
     }
 
     Component.onCompleted: {
         LyricsService.applyPathsFromConfig()
-        _ready = true
+        syncLyricsTrack()
     }
 
-    function stepManualLine(delta) {
-        if (!lyricList.length)
-            return
-        let i = list.currentIndex
-        if (i < 0)
-            i = Lyrics.indexForTime(MprisPlayers.getPositionSec(player, true))
-        i = Math.max(0, Math.min(lyricList.length - 1, i + delta))
-        list.currentIndex = i
-        list.positionViewAtIndex(i, ListView.Center)
+    onActiveChanged: {
+        if (active) {
+            LyricsService.applyPathsFromConfig()
+            Qt.callLater(syncLyricsTrack)
+        }
     }
+
+    Connections {
+        target: Lyrics
+        function onHasLyricsChanged() {
+            root.flag = !root.flag
+        }
+        function onLoadingChanged() {
+            if (!Lyrics.loading && !Lyrics.hasLyrics && root.active && player)
+                Qt.callLater(root.syncLyricsTrack)
+        }
+    }
+
+    state: {
+        flag
+        if (Lyrics.hasLyrics)
+            return "hasLyrics"
+        if (Lyrics.loading)
+            return "loading"
+        return "noLyrics"
+    }
+
+    states: [
+        State {
+            name: "loading"
+            PropertyChanges { target: loadingIndicator; opacity: 1 }
+            PropertyChanges { target: lyricsList; opacity: 0 }
+            PropertyChanges { target: noLyrics; opacity: 0 }
+        },
+        State {
+            name: "hasLyrics"
+            PropertyChanges { target: loadingIndicator; opacity: 0 }
+            PropertyChanges { target: lyricsList; opacity: 1 }
+            PropertyChanges { target: noLyrics; opacity: 0 }
+        },
+        State {
+            name: "noLyrics"
+            PropertyChanges { target: loadingIndicator; opacity: 0 }
+            PropertyChanges { target: lyricsList; opacity: 0 }
+            PropertyChanges { target: noLyrics; opacity: 1 }
+        }
+    ]
 
     Column {
         anchors.fill: parent
@@ -78,27 +135,20 @@ Item {
             height: parent.height - parent.spacing - 22
 
             ListView {
-                id: list
+                id: lyricsList
                 anchors.fill: parent
-                visible: root.hasLyrics && !root.loading
+                anchors.topMargin: parent.height * root.fadeAmount / 2
+                anchors.bottomMargin: parent.height * root.fadeAmount / 2
                 clip: true
                 model: root.lyricList
                 spacing: 6
+                opacity: 0
                 boundsBehavior: Flickable.StopAtBounds
-                highlightRangeMode: ListView.StrictlyEnforceRange
-                preferredHighlightBegin: height * 0.38
-                preferredHighlightEnd: height * 0.62
+                highlightRangeMode: ListView.ApplyRange
                 highlightMoveDuration: 520
                 highlightMoveVelocity: -1
-                snapMode: ListView.SnapToItem
-
-                displaced: Transition {
-                    NumberAnimation {
-                        properties: "y"
-                        duration: Motion.standard
-                        easing.type: Easing.OutCubic
-                    }
-                }
+                preferredHighlightBegin: (height - (currentItem?.height ?? 0)) / 2
+                preferredHighlightEnd: (height + (currentItem?.height ?? 0)) / 2
 
                 Component.onCompleted: {
                     currentIndex = Qt.binding(function() {
@@ -108,20 +158,14 @@ Item {
                     })
                     positionViewAtIndex(currentIndex, ListView.Center)
                 }
-
                 onModelChanged: Qt.callLater(() => positionViewAtIndex(currentIndex, ListView.Center))
-
-                onCurrentIndexChanged: {
-                    if (currentIndex >= 0)
-                        positionViewAtIndex(currentIndex, ListView.Center)
-                }
 
                 delegate: Item {
                     id: lineHost
                     required property int index
                     required property string modelData
 
-                    width: list.width
+                    width: lyricsList.width
                     height: lyricRow.height
 
                     readonly property bool isCurrent: ListView.isCurrentItem
@@ -139,7 +183,7 @@ Item {
                     MediaLyricLine {
                         id: lyricRow
                         width: lineHost.width
-                        lineText: modelData
+                        lineText: modelData || ". . ."
                         lineIndex: index
                         lineCount: root.lyricList.length
                         isCurrent: lineHost.isCurrent
@@ -160,36 +204,19 @@ Item {
                 }
             }
 
-            Rectangle {
-                anchors.fill: parent
-                visible: root.hasLyrics
-                gradient: Gradient {
-                    orientation: Gradient.Vertical
-                    GradientStop { position: 0; color: Qt.rgba(WallustColors.moduleBackground.r,
-                        WallustColors.moduleBackground.g, WallustColors.moduleBackground.b, 0.92) }
-                    GradientStop { position: root.edgeFade; color: "transparent" }
-                    GradientStop { position: 1 - root.edgeFade; color: "transparent" }
-                    GradientStop { position: 1; color: Qt.rgba(WallustColors.moduleBackground.r,
-                        WallustColors.moduleBackground.g, WallustColors.moduleBackground.b, 0.92) }
-                }
-                z: 2
-                enabled: false
-            }
-
             Loader {
                 id: loadingIndicator
                 anchors.centerIn: parent
                 asynchronous: true
-                active: root.loading
+                active: opacity > 0
+                opacity: 0
                 sourceComponent: Column {
                     spacing: 8
-
                     LoadingIndicator {
                         anchors.horizontalCenter: parent.horizontalCenter
                         implicitSize: 36
                         containsIcon: true
                     }
-
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: qsTr("Loading lyrics…")
@@ -201,9 +228,10 @@ Item {
             }
 
             Text {
+                id: noLyrics
                 anchors.centerIn: parent
                 width: parent.width - 8
-                visible: !root.hasLyrics && !root.loading
+                opacity: 0
                 wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
                 text: qsTr("No lyrics found")
@@ -214,19 +242,28 @@ Item {
         }
     }
 
+    function stepManualLine(delta) {
+        if (!root.lyricList.length)
+            return
+        let i = lyricsList.currentIndex
+        if (i < 0)
+            i = Lyrics.indexForTime(MprisPlayers.getPositionSec(player, true))
+        i = Math.max(0, Math.min(root.lyricList.length - 1, i + delta))
+        lyricsList.currentIndex = i
+        lyricsList.positionViewAtIndex(i, ListView.Center)
+    }
+
     Timer {
-        running: root.active
-                && player?.playbackState === MprisPlaybackState.Playing
+        running: root.active && player?.playbackState === MprisPlaybackState.Playing
         interval: (typeof GlobalConfig !== "undefined" && GlobalConfig.dashboard)
                 ? GlobalConfig.dashboard.mediaUpdateInterval
                 : 500
         repeat: true
         onTriggered: {
-            if (!list.visible || !root.lyricList.length)
-                return
-            const i = Lyrics.indexForTime(MprisPlayers.getPositionSec(player, true))
-            if (i >= 0 && i !== list.currentIndex)
-                list.currentIndex = i
+            if (lyricsList.opacity > 0 && root.lyricList.length)
+                lyricsList.positionViewAtIndex(
+                    Lyrics.indexForTime(MprisPlayers.getPositionSec(player, true)),
+                    ListView.Center)
         }
     }
 }

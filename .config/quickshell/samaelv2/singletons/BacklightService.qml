@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
+/** Backlight % — brightnessctl on demand; Hypr passes % after change for instant OSD. */
 Singleton {
     id: root
 
@@ -12,21 +13,44 @@ Singleton {
 
     signal changed()
 
+    function setPercent(pct) {
+        const n = parseInt(pct, 10)
+        if (isNaN(n))
+            return
+        const clamped = Math.max(0, Math.min(100, n))
+        root.present = true
+        root.brightness = clamped / 100.0
+        root.lastPct = clamped
+    }
+
+    function poll() {
+        brightProc.exec()
+    }
+
     Process {
-        command: ["sh", "-c", "dev=$(ls /sys/class/backlight 2>/dev/null | head -n1); [ -n \"$dev\" ] || exit 0; max=$(cat /sys/class/backlight/$dev/max_brightness); last=\"\"; while true; do val=$(cat /sys/class/backlight/$dev/brightness); if [ \"$val\" != \"$last\" ]; then echo \"$(( val * 100 / max ))\"; last=\"$val\"; fi; sleep 0.35; done"]
-        running: true
-        stdout: SplitParser {
-            onRead: line => {
-                const pct = parseInt(line.trim(), 10)
+        id: brightProc
+        command: ["brightnessctl", "-m"]
+        function exec() {
+            running = false
+            running = true
+        }
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const line = String(text).trim()
+                if (!line.length)
+                    return
+                const parts = line.split(",")
+                if (parts.length < 4)
+                    return
+                const pct = parseInt(String(parts[3]).replace("%", "").trim(), 10)
                 if (isNaN(pct))
                     return
-                const seen = root.lastPct >= 0
                 root.present = true
                 root.brightness = Math.max(0, Math.min(100, pct)) / 100.0
                 root.lastPct = pct
-                if (seen)
-                    root.changed()
             }
         }
     }
+
+    Component.onCompleted: poll()
 }

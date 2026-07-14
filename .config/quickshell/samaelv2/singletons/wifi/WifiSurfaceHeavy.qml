@@ -242,9 +242,17 @@ Item {
         syncScanner()
         if (open) {
             refresh()
+            // First open often has empty Networking.networks until scanner + rescan run.
+            if (wifiOn) {
+                startScan()
+                openRetry.bursts = 0
+                openRetry.restart()
+            }
+            bumpList()
             activePoll.restart()
             activeProc.running = true
         } else {
+            openRetry.stop()
             activePoll.stop()
             stopScan()
             expandedSsid = ""
@@ -265,6 +273,23 @@ Item {
     onWifiOnChanged: syncScanner()
 
     Timer {
+        id: openRetry
+        interval: 350
+        repeat: true
+        property int bursts: 0
+        onTriggered: {
+            bursts++
+            root.syncScanner()
+            root.refresh()
+            if (root.wifiOn && root.nets.length === 0 && bursts <= 2)
+                root.startScan()
+            root.bumpList()
+            if (bursts >= 4 || root.nets.length > 0)
+                stop()
+        }
+    }
+
+    Timer {
         id: toastClear
         interval: 2400
         onTriggered: root.clearToast()
@@ -282,7 +307,11 @@ Item {
         onTriggered: if (secProc && !secProc.running) secProc.running = true
     }
 
-        onNetsChanged: secRefresh.restart()
+        onNetsChanged: {
+            // Drive ListView even before nmcli security map returns
+            bumpList()
+            secRefresh.restart()
+        }
 
         Timer {
             id: activePoll
