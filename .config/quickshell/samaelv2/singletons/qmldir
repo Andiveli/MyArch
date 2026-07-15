@@ -23,3 +23,5 @@ singleton LauncherService LauncherService.qml
 singleton CalendarService CalendarService.qml
 singleton LockService LockService.qml
 singleton PowerSession PowerSession.qml
+singleton KeybindCatalog KeybindCatalog.qml
+singleton AudioRouteService AudioRouteService.qml

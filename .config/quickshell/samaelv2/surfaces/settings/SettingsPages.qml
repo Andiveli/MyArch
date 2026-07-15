@@ -9,6 +9,9 @@ ColumnLayout {
 
     property string pageId: "general"
     readonly property int _rev: ShellConfigService.revision
+    /** Keybinds drill toggled — SettingsSurface refreshes flickable height / rows. */
+    signal keybindLayoutChanged()
+    signal audioLayoutChanged()
 
     width: parent ? parent.width : 400
     spacing: 2
@@ -48,7 +51,36 @@ ColumnLayout {
         ShellConfigService.setDraftPath(base.slice(0, 2), copy)
     }
 
+    function clearKeybindDrill() {
+        if (root.pageId !== "keybinds" || !pageContentLoader.item)
+            return false
+        const kb = pageContentLoader.item
+        if (!kb.keyDrillId || !kb.keyDrillId.length)
+            return false
+        kb.keyDrillId = ""
+        root.keybindLayoutChanged()
+        return true
+    }
+
+    function keybindDrillActive() {
+        return root.pageId === "keybinds" && pageContentLoader.item
+            && pageContentLoader.item.keyDrillId
+            && pageContentLoader.item.keyDrillId.length > 0
+    }
+
+    function clearAudioOutputPicker() {
+        if (root.pageId !== "audio" || !pageContentLoader.item)
+            return false
+        const host = pageContentLoader.item
+        if (!host.outputPickerStreamId || !host.outputPickerStreamId.length)
+            return false
+        host.outputPickerStreamId = ""
+        root.audioLayoutChanged()
+        return true
+    }
+
     Loader {
+        id: pageContentLoader
         Layout.fillWidth: true
         Layout.preferredWidth: root.width
         sourceComponent: root.pageId === "bar" ? barComp
@@ -56,6 +88,7 @@ ColumnLayout {
             : root.pageId === "lyrics" ? lyricsComp
             : root.pageId === "wallpaper" ? wallpaperComp
             : root.pageId === "audio" ? audioComp
+            : root.pageId === "keybinds" ? keybindsComp
             : generalComp
     }
 
@@ -295,19 +328,213 @@ ColumnLayout {
     Component {
         id: audioComp
         ColumnLayout {
+            id: audioCol
             width: root.width
-            spacing: 8
-            SettingsSectionHeader { first: true; text: "AUDIO" }
-            Text {
-                width: parent.width
-                wrapMode: Text.WordWrap
-                text: "Per-app output routing (Spotify → BT, browser → laptop speakers) will live here. PipeWire sink-input list + rules in config.json — next slice."
-                color: WallustColors.moduleText
-                opacity: 0.65
-                font.family: Style.fontFamily
-                font.pixelSize: Style.fontPixelSize
-                lineHeight: 1.35
+            spacing: 4
+
+            property string outputPickerStreamId: ""
+            readonly property int _ar: AudioRouteService.revision
+
+            function toggleOutputPicker(id) {
+                const sid = String(id)
+                outputPickerStreamId = (outputPickerStreamId === sid) ? "" : sid
+                root.audioLayoutChanged()
             }
+
+            onOutputPickerStreamIdChanged: root.audioLayoutChanged()
+
+            Connections {
+                target: AudioRouteService
+                function onRevisionChanged() {
+                    if (root.pageId === "audio")
+                        Qt.callLater(root.audioLayoutChanged)
+                }
+            }
+
+            SettingsSectionHeader { first: true; text: "STREAMS" }
+
+            Repeater {
+                id: streamRep
+                model: AudioRouteService.streams
+                delegate: ColumnLayout {
+                    required property int index
+                    required property var modelData
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    readonly property string sid: String(modelData.id || "")
+                    readonly property bool menuOpen: audioCol.outputPickerStreamId === sid
+
+                    SettingsAudioStreamRow {
+                        Layout.fillWidth: true
+                        first: index === 0
+                        last: !menuOpen && index === streamRep.count - 1
+                        stream: modelData
+                        outputMenuOpen: menuOpen
+                        onToggleOutputMenu: audioCol.toggleOutputPicker(sid)
+                    }
+
+                    Repeater {
+                        id: outPickRep
+                        model: menuOpen ? AudioRouteService.sinks : []
+                        delegate: SettingsAudioOutputPickRow {
+                            required property int index
+                            required property var modelData
+                            Layout.fillWidth: true
+                            first: false
+                            last: index === outPickRep.count - 1
+                                && parent.index === streamRep.count - 1
+                            sink: modelData
+                            streamId: parent.sid
+                            activeSinkId: String(parent.modelData.sinkId || "")
+                        }
+                    }
+                }
+            }
+
+            SettingsAudioActionRow {
+                Layout.fillWidth: true
+                label: AudioRouteService.loading ? "Refreshing…" : "Refresh"
+                onActivated: AudioRouteService.refresh()
+            }
+        }
+    }
+
+    Component {
+        id: keybindsComp
+        Item {
+            id: kbHost
+            width: root.width
+            implicitHeight: kbColumn.implicitHeight
+            property string keyDrillId: ""
+
+            onKeyDrillIdChanged: {
+                kbColumn.implicitHeightChanged()
+                root.keybindLayoutChanged()
+            }
+
+            ColumnLayout {
+                id: kbColumn
+                width: parent.width
+                spacing: 2
+                onImplicitHeightChanged: root.implicitHeightChanged()
+
+                SettingsSectionHeader {
+                    first: true
+                    text: kbHost.keyDrillId.length ? ("INSIDE · " + KeybindCatalog.insideTitle(kbHost.keyDrillId).toUpperCase()) : "REFERENCE"
+                }
+
+                SettingsConnectedRow {
+                    visible: !kbHost.keyDrillId.length
+                    first: true
+                    last: true
+                    implicitHeight: refNote.implicitHeight + 16
+                    Text {
+                        id: refNote
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: "From hyprland/keybinds.lua + samaelv2 surfaces. Read-only. Surfaces: l/Enter for inside keys."
+                        color: WallustColors.moduleText
+                        opacity: 0.6
+                        font.family: Style.fontFamily
+                        font.pixelSize: Style.fontPixelSize - 2
+                        lineHeight: 1.35
+                    }
+                }
+
+                SettingsKeybindBackRow {
+                    visible: kbHost.keyDrillId.length > 0
+                    Layout.fillWidth: true
+                    first: true
+                    onBackRequested: {
+                        kbHost.keyDrillId = ""
+                    }
+                }
+
+                // --- drilled: inside keys only ---
+                Repeater {
+                    id: insideKbRep
+                    visible: kbHost.keyDrillId.length > 0
+                    model: kbHost.keyDrillId.length ? KeybindCatalog.insideEntries(kbHost.keyDrillId) : []
+
+                    delegate: SettingsKeybindRow {
+                        required property int index
+                        required property var modelData
+                        Layout.fillWidth: true
+                        first: index === 0
+                        last: index === insideKbRep.count - 1
+                        keys: modelData.keys || ""
+                        action: modelData.action || ""
+                    }
+                }
+
+                // --- top level ---
+                ColumnLayout {
+                    visible: !kbHost.keyDrillId.length
+                    Layout.fillWidth: true
+                    spacing: 2
+
+                    SettingsSectionHeader { text: "APPLICATIONS" }
+                    Repeater {
+                        id: appKbRep
+                        model: KeybindCatalog.appEntries
+                        delegate: SettingsKeybindRow {
+                            required property int index
+                            required property var modelData
+                            Layout.fillWidth: true
+                            first: index === 0
+                            last: index === appKbRep.count - 1
+                            keys: modelData.keys || ""
+                            action: modelData.action || ""
+                        }
+                    }
+
+                    SettingsSectionHeader { text: "OPEN SURFACES" }
+                    Text {
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                        text: "Hypr → Quickshell · l/Enter → keys inside the pill"
+                        color: WallustColors.moduleText
+                        opacity: 0.45
+                        font.family: Style.fontFamily
+                        font.pixelSize: Style.fontPixelSize - 2
+                        leftPadding: 4
+                    }
+                    Repeater {
+                        id: surfaceKbRep
+                        model: KeybindCatalog.surfaceOpenRows
+                        delegate: SettingsKeybindDrillRow {
+                            required property int index
+                            required property var modelData
+                            Layout.fillWidth: true
+                            first: index === 0
+                            last: index === surfaceKbRep.count - 1
+                            keys: modelData.keys || ""
+                            action: modelData.action || ""
+                            drillId: modelData.drillId || ""
+                            onDrillRequested: id => {
+                                kbHost.keyDrillId = id
+                            }
+                        }
+                    }
+
+                    SettingsSectionHeader { text: "TOOLS & OTHER" }
+                    Repeater {
+                        id: toolKbRep
+                        model: KeybindCatalog.toolEntries
+                        delegate: SettingsKeybindRow {
+                            required property int index
+                            required property var modelData
+                            Layout.fillWidth: true
+                            first: index === 0
+                            last: index === toolKbRep.count - 1
+                            keys: modelData.keys || ""
+                            action: modelData.action || ""
+                        }
+                    }
+                }
+            }
+
         }
     }
 }

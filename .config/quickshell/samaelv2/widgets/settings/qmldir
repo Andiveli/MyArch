@@ -4,3 +4,17 @@ SettingsSectionHeader 1.0 SettingsSectionHeader.qml
 SettingsNavRow 1.0 SettingsNavRow.qml
 SettingsToggleRow 1.0 SettingsToggleRow.qml
 SettingsStepperRow 1.0 SettingsStepperRow.qml
+SettingsKeybindRow 1.0 SettingsKeybindRow.qml
+SettingsKeybindDrillRow 1.0 SettingsKeybindDrillRow.qml
+SettingsKeybindBackRow 1.0 SettingsKeybindBackRow.qml
+SettingsAudioActionRow 1.0 SettingsAudioActionRow.qml
+SettingsAudioRuleRow 1.0 SettingsAudioRuleRow.qml
+SettingsAudioSourceRow 1.0 SettingsAudioSourceRow.qml
+SettingsAudioStreamCard 1.0 SettingsAudioStreamCard.qml
+SettingsAudioStreamRow 1.0 SettingsAudioStreamRow.qml
+SettingsAudioOutputPickRow 1.0 SettingsAudioOutputPickRow.qml
+SettingsAudioMixerDetail 1.0 SettingsAudioMixerDetail.qml
+SettingsAudioVolumeRow 1.0 SettingsAudioVolumeRow.qml
+SettingsAudioToggleBtnRow 1.0 SettingsAudioToggleBtnRow.qml
+SettingsAudioSinkPickRow 1.0 SettingsAudioSinkPickRow.qml
+SettingsAudioMediaBtn 1.0 SettingsAudioMediaBtn.qml

@@ -55,8 +55,8 @@ FocusScope {
         if (ShellConfigService.statusMessage.length)
             return ShellConfigService.statusMessage
         return focusBand === 0
-            ? "j/k page · l/Enter panel · Tab · s save · Esc"
-            : "j/k row · l toggle/+ · Shift+h − · h nav · s save · Esc"
+            ? "j/k page · l/Enter panel · s save · Esc close"
+            : "j/k · s save · Esc nav"
     }
 
     function handleKey(event) {
@@ -64,6 +64,27 @@ FocusScope {
             return
         const t = event.text
         if (event.key === Qt.Key_Escape) {
+            if (focusBand === 1 && pageHost.pagesHostPages) {
+                if (pageHost.pagesHostPages.clearAudioOutputPicker
+                        && pageHost.pagesHostPages.clearAudioOutputPicker()) {
+                    Qt.callLater(pageHost.afterKeybindLayoutChange)
+                    event.accepted = true
+                    return
+                }
+                if (pageHost.pagesHostPages.keybindDrillActive
+                        && pageHost.pagesHostPages.keybindDrillActive()) {
+                    pageHost.pagesHostPages.clearKeybindDrill()
+                    contentRow = 0
+                    Qt.callLater(pageHost.afterKeybindLayoutChange)
+                    event.accepted = true
+                    return
+                }
+            }
+            if (focusBand === 1) {
+                focusBand = 0
+                event.accepted = true
+                return
+            }
             ShellActions.closeMiddleSurface?.()
             event.accepted = true
             return
@@ -101,7 +122,7 @@ FocusScope {
                 focusBand = 1
                 contentRow = 0
                 Qt.callLater(() => {
-                    pageHost.rebuildRows()
+                    pageHost.syncContentFocus()
                     contentFlick.centerRowInView(0)
                 })
                 event.accepted = true
@@ -111,23 +132,87 @@ FocusScope {
             const rows = contentFlick.interactiveRows || 0
             if (t === "j" || event.key === Qt.Key_Down) {
                 contentRow = Math.min(Math.max(0, rows - 1), contentRow + 1)
+                Qt.callLater(() => pageHost.syncContentFocus())
                 event.accepted = true
                 return
             }
             if (t === "k" || event.key === Qt.Key_Up) {
                 contentRow = Math.max(0, contentRow - 1)
+                Qt.callLater(() => pageHost.syncContentFocus())
                 event.accepted = true
                 return
             }
+            const rowItem = pageHost.rowItemAt(contentRow)
+            if (t === "m" || t === "M") {
+                if (rowItem && rowItem.audioStreamRow === true && typeof rowItem.audioMuteToggle === "function") {
+                    rowItem.audioMuteToggle()
+                    event.accepted = true
+                    return
+                }
+            }
+            if (t === "c" || t === "C") {
+                if (rowItem && rowItem.audioStreamRow === true && typeof rowItem.openOutputMenu === "function") {
+                    rowItem.openOutputMenu()
+                    Qt.callLater(pageHost.afterKeybindLayoutChange)
+                    event.accepted = true
+                    return
+                }
+            }
             if (t === "h" || event.key === Qt.Key_Left) {
+                if (rowItem && rowItem.audioStreamRow === true && typeof rowItem.bump === "function") {
+                    rowItem.bump(-1)
+                    event.accepted = true
+                    return
+                }
+                if (rowItem && rowItem.audioVolumeRow === true) {
+                    if (typeof rowItem.bump === "function")
+                        rowItem.bump(-1)
+                    event.accepted = true
+                    return
+                }
+                if (currentPageId === "keybinds" && pageHost.pagesHostPages
+                        && pageHost.pagesHostPages.clearKeybindDrill()) {
+                    contentRow = 0
+                    Qt.callLater(pageHost.afterKeybindLayoutChange)
+                    event.accepted = true
+                    return
+                }
                 focusBand = 0
                 event.accepted = true
                 return
             }
             if (t === "l" || event.key === Qt.Key_Right || event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                if (rowItem && rowItem.audioStreamRow === true && typeof rowItem.bump === "function") {
+                    rowItem.bump(1)
+                    event.accepted = true
+                    return
+                }
+                if (rowItem && rowItem.audioVolumeRow === true) {
+                    if (typeof rowItem.bump === "function")
+                        rowItem.bump(1)
+                    event.accepted = true
+                    return
+                }
+                if (rowItem && rowItem.audioOutputPickRow === true && typeof rowItem.trigger === "function") {
+                    rowItem.trigger()
+                    event.accepted = true
+                    return
+                }
                 contentFlick.activateRow(contentRow, 1)
                 event.accepted = true
                 return
+            }
+            if (event.key === Qt.Key_Space) {
+                if (rowItem && rowItem.audioStreamRow === true && typeof rowItem.audioPlayToggle === "function") {
+                    rowItem.audioPlayToggle()
+                    event.accepted = true
+                    return
+                }
+                if (rowItem && typeof rowItem.trigger === "function") {
+                    rowItem.trigger()
+                    event.accepted = true
+                    return
+                }
             }
             if (t === "h" && (event.modifiers & Qt.ShiftModifier)) {
                 contentFlick.activateRow(contentRow, -1)
@@ -283,6 +368,22 @@ FocusScope {
                         const item = pageHost.rowItemAt(row)
                         if (!item)
                             return
+                        if (item.keybindDrillBack === true) {
+                            item.backRequested()
+                            root.contentRow = 0
+                            Qt.callLater(pageHost.afterKeybindLayoutChange)
+                            return
+                        }
+                        if (item.drillId !== undefined && String(item.drillId).length > 0) {
+                            item.drillRequested(item.drillId)
+                            root.contentRow = 0
+                            Qt.callLater(pageHost.afterKeybindLayoutChange)
+                            return
+                        }
+                        if (typeof item.trigger === "function") {
+                            item.trigger()
+                            return
+                        }
                         if (typeof item.bump === "function")
                             item.bump(delta >= 0 ? 1 : -1)
                         else if (item.checked !== undefined)
@@ -318,11 +419,11 @@ FocusScope {
                         target: root
                         function onContentRowChanged() {
                             if (root.focusBand === 1)
-                                Qt.callLater(() => contentFlick.centerRowInView(root.contentRow))
+                                Qt.callLater(() => contentFlick.ensureRowVisible(root.contentRow))
                         }
                         function onFocusBandChanged() {
                             if (root.focusBand === 1)
-                                Qt.callLater(() => contentFlick.centerRowInView(root.contentRow))
+                                Qt.callLater(() => contentFlick.ensureRowVisible(root.contentRow))
                         }
                         function onCurrentPageIdChanged() {
                             contentFlick.contentY = 0
@@ -338,6 +439,8 @@ FocusScope {
                         y: 4
                         property int rowCount: 0
                         property var _rowItems: []
+                        /** SettingsPages root (Loader child) — do not use pagesLoader id from outside pageHost. */
+                        readonly property var pagesHostPages: pagesLoader.item
 
                         function rowItemAt(i) {
                             if (i < 0 || i >= _rowItems.length)
@@ -363,12 +466,35 @@ FocusScope {
                             }
                         }
 
+                        function refreshFlickableHeight() {
+                            contentFlick.contentHeight = Math.max(contentFlick.height, pageHost.implicitHeight + 16)
+                        }
+
+                        function syncContentFocus() {
+                            pageHost.rebuildRows()
+                            pageHost.setVimFocusOnRows()
+                            contentFlick.ensureRowVisible(root.contentRow)
+                        }
+
+                        function afterKeybindLayoutChange() {
+                            pageHost.rebuildRows()
+                            pageHost.refreshFlickableHeight()
+                            pageHost.setVimFocusOnRows()
+                            contentFlick.ensureRowVisible(root.contentRow)
+                        }
+
                         Connections {
                             target: pagesLoader.item
                             ignoreUnknownSignals: true
                             function onImplicitHeightChanged() {
                                 pageHost.rebuildRows()
-                                contentFlick.contentHeight = Math.max(contentFlick.height, pageHost.implicitHeight + 16)
+                                pageHost.refreshFlickableHeight()
+                            }
+                            function onKeybindLayoutChanged() {
+                                Qt.callLater(pageHost.afterKeybindLayoutChange)
+                            }
+                            function onAudioLayoutChanged() {
+                                Qt.callLater(pageHost.afterKeybindLayoutChange)
                             }
                         }
 
