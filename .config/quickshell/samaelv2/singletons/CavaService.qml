@@ -5,27 +5,62 @@ import Quickshell
 import Quickshell.Io
 
 /**
- * Cava visualizer — always on while widget is in bar (Engram #1344 P2).
- * Captures PipeWire sink (YouTube, games, Discord), not only MPRIS players.
+ * Cava — monitors the sink where playback actually is (follows moved sink-inputs).
  */
 Item {
     id: root
 
-    readonly property string configPath: Quickshell.shellPath("scripts/cava/samael_waybar.conf")
+    readonly property string liveConfigPath: Quickshell.shellPath("scripts/cava/samael_waybar.live.conf")
     readonly property bool wantProcess: ShellConfig.barEnabled && ShellConfig.hasWidget("right", "cava")
 
     property bool available: true
     property list<double> bars: []
+    property string pulseSource: "auto"
+    property string _appliedSource: ""
 
     onWantProcessChanged: {
         if (!wantProcess)
             bars = []
+        else
+            Qt.callLater(root.resolveAndMaybeRestart)
+    }
+
+    function resolveAndMaybeRestart() {
+        resolveProc.running = true
+    }
+
+    function restartCavaIfNeeded() {
+        if (!wantProcess)
+            return
+        if (pulseSource === _appliedSource && cavaProcess.running)
+            return
+        _appliedSource = pulseSource
+        cavaProcess.running = false
+        cavaProcess.running = true
+    }
+
+    Process {
+        id: resolveProc
+        command: [
+            "python3",
+            Quickshell.shellPath("scripts/cava-monitor-source.py"),
+            root.liveConfigPath
+        ]
+        stdout: StdioCollector { id: resolveOut }
+        onExited: (code) => {
+            const line = String(resolveOut.text || "").trim().split("\n").pop()
+            if (code === 0 && line.length)
+                root.pulseSource = line
+            else
+                root.pulseSource = "auto"
+            root.restartCavaIfNeeded()
+        }
     }
 
     Process {
         id: cavaProcess
-        command: ["cava", "-p", root.configPath]
-        running: root.wantProcess
+        command: ["cava", "-p", root.liveConfigPath]
+        running: false
         stdout: SplitParser {
             onRead: data => {
                 const trimmed = data.trim()
@@ -37,5 +72,18 @@ Item {
             }
         }
         onExited: root.available = false
+    }
+
+    Connections {
+        target: AudioRouteService
+        function onRevisionChanged() {
+            if (root.wantProcess)
+                root.resolveAndMaybeRestart()
+        }
+    }
+
+    Component.onCompleted: {
+        if (wantProcess)
+            resolveAndMaybeRestart()
     }
 }

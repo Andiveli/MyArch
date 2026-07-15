@@ -344,11 +344,23 @@ ColumnLayout {
             onOutputPickerStreamIdChanged: root.audioLayoutChanged()
 
             Connections {
+                target: root
+                function onPageIdChanged() {
+                    if (root.pageId === "audio")
+                        AudioRouteService.refresh()
+                }
+            }
+            Connections {
                 target: AudioRouteService
                 function onRevisionChanged() {
                     if (root.pageId === "audio")
                         Qt.callLater(root.audioLayoutChanged)
                 }
+            }
+
+            Component.onCompleted: {
+                if (root.pageId === "audio")
+                    AudioRouteService.refresh()
             }
 
             SettingsSectionHeader { first: true; text: "STREAMS" }

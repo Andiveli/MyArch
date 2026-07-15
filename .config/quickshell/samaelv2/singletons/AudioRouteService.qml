@@ -17,8 +17,6 @@ Singleton {
     property string lastError: ""
     property int revision: 0
 
-    readonly property string configPath: Quickshell.shellPath("config.json")
-
     function bump() {
         revision++
     }
@@ -88,10 +86,6 @@ Singleton {
         listProc.running = true
     }
 
-    function applyFromConfigFile() {
-        applyProc.running = true
-    }
-
     function runJsonScript(scriptName, payload, onDone) {
         const json = JSON.stringify(payload)
         jsonProc._onDone = onDone || null
@@ -106,7 +100,10 @@ Singleton {
 
     function moveStream(streamId, sinkId) {
         runJsonScript("audio-stream-ctl.py", { op: "move", streamId: String(streamId), sinkId: String(sinkId) },
-            () => Qt.callLater(refresh))
+            () => Qt.callLater(() => {
+                refresh()
+                CavaService.resolveAndMaybeRestart()
+            }))
     }
 
     function setStreamVolume(streamId, volume) {
@@ -189,26 +186,6 @@ Singleton {
     }
 
     Process {
-        id: applyProc
-        command: ["python3", Quickshell.shellPath("scripts/audio-apply-rules.py"), root.configPath]
-        stdout: StdioCollector { id: applyOut }
-        onExited: (code) => {
-            if (code !== 0) {
-                root.lastError = "Apply failed"
-                root.bump()
-                return
-            }
-            try {
-                const o = JSON.parse(applyOut.text || "{}")
-                root.lastError = o.ok ? "" : "Apply failed"
-            } catch (e) {
-                root.lastError = "Apply failed"
-            }
-            Qt.callLater(root.refresh)
-        }
-    }
-
-    Process {
         id: mprisProc
         property var _onDone: null
         onExited: () => {
@@ -243,15 +220,4 @@ Singleton {
         }
     }
 
-    Timer {
-        interval: 5000
-        repeat: true
-        running: ShellConfig.audioRoutingEnabled
-        onTriggered: {
-            if (!root.loading)
-                root.applyFromConfigFile()
-        }
-    }
-
-    Component.onCompleted: Qt.callLater(refresh)
 }

@@ -27,7 +27,7 @@ Singleton {
         { id: "surfaces", label: "Surfaces", icon: "\uf2d2", description: "Panel sizes" },
         { id: "lyrics", label: "Lyrics", icon: "\uf001", description: "Dir, backend, offset" },
         { id: "wallpaper", label: "Wallpaper", icon: "\uf03e", description: "Image folder" },
-        { id: "audio", label: "Audio", icon: "\uf028", description: "Per-app output" },
+        { id: "audio", label: "Audio", icon: "\uf028", description: "Session mixer" },
         { id: "keybinds", label: "Keybinds", icon: "\uf11c", description: "Shortcuts reference (read-only)" }
     ]
 
@@ -138,46 +138,6 @@ Singleton {
         return barZoneList(zone).indexOf(widgetId) >= 0
     }
 
-    function routingRules() {
-        const r = getDraftPath(["audio", "routingRules"], [])
-        return Array.isArray(r) ? r.slice() : []
-    }
-
-    function setRoutingRules(rules) {
-        setDraftPath(["audio", "routingRules"], rules)
-    }
-
-    function updateRoutingRule(index, patch) {
-        const a = routingRules()
-        if (index < 0 || index >= a.length)
-            return
-        const copy = JSON.parse(JSON.stringify(a[index]))
-        Object.assign(copy, patch)
-        a[index] = copy
-        setRoutingRules(a)
-    }
-
-    function addRoutingRule(rule) {
-        const a = routingRules()
-        a.push(Object.assign({
-            enabled: true,
-            match: "",
-            matchKind: "application.process.binary",
-            matchMode: "equals",
-            sinkId: "",
-            label: ""
-        }, rule || {}))
-        setRoutingRules(a)
-    }
-
-    function removeRoutingRule(index) {
-        const a = routingRules()
-        if (index < 0 || index >= a.length)
-            return
-        a.splice(index, 1)
-        setRoutingRules(a)
-    }
-
     function save(done) {
         if (saving)
             return
@@ -219,7 +179,6 @@ Singleton {
             root.revision++
             ShellConfig.applyConfigObject(root.draft)
             ShellConfig.reloadFromDisk()
-            Qt.callLater(() => AudioRouteService.applyFromConfigFile())
             if (root._saveDoneCallback)
                 root._saveDoneCallback(true)
             root._saveDoneCallback = null

@@ -4,3 +4,6 @@ state/
 
 # Google Calendar iCal secret URLs — never commit
 calendar-secrets.json
+
+# Generated cava pulse source (cava-monitor-source.py)
+scripts/cava/samael_waybar.live.conf

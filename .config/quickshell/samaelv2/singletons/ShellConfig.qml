@@ -42,9 +42,6 @@ Item {
         readonly property int lyricsPanelWidth: _cfg.lyrics?.panelWidth ?? 220
         readonly property real lyricsTimeOffsetSec: _cfg.lyrics?.timeOffsetSec ?? 0
         readonly property var launcherPinned: _list(_cfg.launcher?.pinned, [])
-        readonly property bool audioRoutingEnabled: _cfg.audio?.routingEnabled !== false
-        readonly property var audioRoutingRules: _list(_cfg.audio?.routingRules, [])
-
         readonly property string lyricsDirExpanded: {
             const d = lyricsDir.trim()
             if (!d.length)
@@ -122,11 +119,7 @@ Item {
                     }
                 },
 
-            style: { cornerRadius: 14, sectionBottomMargin: 3 },
-            audio: {
-                routingEnabled: true,
-                routingRules: []
-            }
+            style: { cornerRadius: 14, sectionBottomMargin: 3 }
         }
     }
 
