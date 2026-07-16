@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Samael: apply wallpaper without killing qs / waybar / swaync (JaKooLit Refresh.sh path).
+# Samael: apply wallpaper without killing qs (unlike full Refresh.sh).
 # Canonical location: ~/.config/hypr/scripts/samael-wallpaper.sh — see WALLPAPER-SAMAEL-APPLY.md
 set -euo pipefail
 
@@ -47,14 +47,14 @@ fi
 mkdir -p "$(dirname "$WALLPAPER_CURRENT")"
 cp -f "$imgpath" "$WALLPAPER_CURRENT" 2>/dev/null || true
 
-waybar_colors="$HOME/.config/waybar/wallust/colors-waybar.css"
-old_mtime=$(stat -c %Y "$waybar_colors" 2>/dev/null || echo 0)
+wallust_css="$HOME/.config/waybar/wallust/colors-waybar.css"
+old_mtime=$(stat -c %Y "$wallust_css" 2>/dev/null || echo 0)
 
 "$HYPR_SCRIPTS/WallustSwww.sh" "$imgpath"
 
 for _ in $(seq 1 40); do
-	if [[ -s "$waybar_colors" ]]; then
-		cur=$(stat -c %Y "$waybar_colors" 2>/dev/null || echo 0)
+	if [[ -s "$wallust_css" ]]; then
+		cur=$(stat -c %Y "$wallust_css" 2>/dev/null || echo 0)
 		if [[ "$cur" -gt "$old_mtime" ]]; then
 			break
 		fi
@@ -63,5 +63,5 @@ for _ in $(seq 1 40); do
 done
 
 if command -v qs >/dev/null; then
-	qs -c samael ipc call wallustColors reload 2>/dev/null || true
+	qs -c samaelv2 ipc call wallustColors reload 2>/dev/null || true
 fi

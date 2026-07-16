@@ -4,6 +4,9 @@
 # We set a fixed multi-color gradient once, then manually animate the angle
 # in a loop because the built-in borderangle animation (hl.animation) does not
 # actually drive the gradient in this Lua config setup (angle stays frozen).
+#
+# Canonical path: ~/.config/hypr/scripts/RainbowBorders.sh
+# Autostart: hyprland/execs.lua (commented). Pair with borderangle in general.lua.
 
 # Kill any previous rainbow driver to avoid duplicates (safer pattern)
 for pid in $(pgrep -f "RainbowBorders.sh" 2>/dev/null | grep -v $$); do

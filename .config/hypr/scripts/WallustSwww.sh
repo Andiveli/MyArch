@@ -57,3 +57,10 @@ cp -f "$wallpaper_path" "$wallpaper_current" || true
 # Run wallust (silent) to regenerate templates defined in ~/.config/wallust/wallust.toml
 # -s is used in this repo to keep things quiet and avoid extra prompts
 wallust run -s "$wallpaper_path" || true
+
+# Apply wallust color12 as Hyprland active window border (matches Quickshell's borderColor)
+c12=$(sed -n 's/^\$color12 = rgb(\([0-9A-Fa-f]\{6\}\))$/\1/p' \
+    "$HOME/.config/hypr/wallust/wallust-hyprland.conf" 2>/dev/null)
+if [[ -n "$c12" ]]; then
+    hyprctl eval "hl.config({ general = { col = { active_border = \"rgba(${c12}FF)\" } } })" >/dev/null 2>&1 || true
+fi

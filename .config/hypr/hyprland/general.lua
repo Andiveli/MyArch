@@ -75,12 +75,12 @@ hl.config({
 		inactive_opacity = 0.9,
 		fullscreen_opacity = 1.0,
 
-		dim_inactive = true,
+		dim_inactive = false,
 		dim_strength = 0.1,
 		dim_special = 0.8,
 
 		blur = {
-			enabled = true,
+			enabled = false,
 			xray = true,
 			special = true,
 			new_optimizations = true,
@@ -206,14 +206,15 @@ hl.animation({
 	bezier = "emphasizedDecel",
 })
 
--- Rainbow borders support: rotate the gradient angle continuously
-hl.animation({
-	leaf = "borderangle",
-	enabled = true,
-	speed = 100,
-	bezier = "linear",
-	style = "loop",
-})
+-- Rainbow borders: rotate gradient angle (pair with execs.lua RainbowBorders.sh autostart).
+-- DISABLED (2026-07-13): CPU cost with RainbowBorders loop. Re-enable both blocks together.
+-- hl.animation({
+-- 	leaf = "borderangle",
+-- 	enabled = true,
+-- 	speed = 100,
+-- 	bezier = "linear",
+-- 	style = "loop",
+-- })
 
 -- layers
 hl.animation({
@@ -304,7 +305,7 @@ hl.config({
 		swallow_regex = "kitty",
 		on_focus_under_fullscreen = 2,
 		allow_session_lock_restore = true,
-		session_lock_xray = true,
+		session_lock_xray = false,
 		initial_workspace_tracking = false,
 		focus_on_activate = true,
 	},

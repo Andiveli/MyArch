@@ -5,6 +5,14 @@
 iDIR="$HOME/.config/swaync/icons"
 sDIR="$HOME/.config/hypr/scripts"
 
+samaelv2_bar_osd_volume() {
+    if [ "$(pamixer --get-mute)" = "true" ]; then
+        qs -c samaelv2 ipc call samaelv2 osdVolume mute 2>/dev/null || true
+    else
+        qs -c samaelv2 ipc call samaelv2 osdVolume "$(pamixer --get-volume)" 2>/dev/null || true
+    fi
+}
+
 # Get Volume
 get_volume() {
     volume=$(pamixer --get-volume)
@@ -31,7 +39,8 @@ get_icon() {
 
 # Notify (optional). samaelv2 shows Pipewire OSD on the bar; skip swaync spam when qs -c samaelv2 is running.
 notify_user() {
-    if pgrep -f "quickshell.*samaelv2" >/dev/null 2>&1; then
+    if pgrep -f '[q]s -c samaelv2' >/dev/null 2>&1; then
+        samaelv2_bar_osd_volume
         [[ "$(get_volume)" != "Muted" ]] && "$sDIR/Sounds.sh" --volume 2>/dev/null || true
         return
     fi
@@ -64,9 +73,18 @@ dec_volume() {
 # Toggle Mute
 toggle_mute() {
 	if [ "$(pamixer --get-mute)" == "false" ]; then
-		pamixer -m && notify-send -e -u low -h boolean:SWAYNC_BYPASS_DND:true -i "$iDIR/volume-mute.png" " Mute"
+		pamixer -m
 	elif [ "$(pamixer --get-mute)" == "true" ]; then
-		pamixer -u && notify-send -e -u low -h boolean:SWAYNC_BYPASS_DND:true -i "$(get_icon)" " Volume:" " Switched ON"
+		pamixer -u
+	fi
+	if pgrep -f 'qs -c samaelv2' >/dev/null 2>&1; then
+		samaelv2_bar_osd_volume
+	else
+		if [ "$(pamixer --get-mute)" == "true" ]; then
+			notify-send -e -u low -h boolean:SWAYNC_BYPASS_DND:true -i "$iDIR/volume-mute.png" " Mute"
+		else
+			notify-send -e -u low -h boolean:SWAYNC_BYPASS_DND:true -i "$(get_icon)" " Volume:" " Switched ON"
+		fi
 	fi
 }
 

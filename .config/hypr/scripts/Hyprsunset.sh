@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Hyprsunset toggle + Waybar status helper
+# Hyprsunset toggle; `status` emits JSON for optional bar modules (Quickshell/samaelv2)
 # Phase 1: manual toggle only (no scheduling)
 # Icons:
 # - Off: bright sun

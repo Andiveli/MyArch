@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Samael: JaKooLit-style rofi wallpaper grid — apply without Refresh.sh (no qs/waybar kill).
+# Samael: rofi wallpaper grid — apply via samael-wallpaper.sh (no qs restart).
 set -euo pipefail
 
 export LANG=en_US.UTF-8

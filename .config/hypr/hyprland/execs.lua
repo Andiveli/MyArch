@@ -12,8 +12,7 @@ hl.on("hyprland.start", function()
 	-- Custom
 	hl.exec_cmd(HOME .. "/Documentos/Handy_0.8.3_amd64.AppImage")
 
-	-- Bar / notifications: Quickshell (Samael panel); Waybar + swaync removed from autostart
-	hl.exec_cmd(HOME .. "/.config/hypr/hyprland/scripts/start_geoclue_agent.sh")
+	-- Bar / notifications: Quickshell (samaelv2)
 	hl.exec_cmd("pypr &")
 
 	-- Core components
@@ -26,20 +25,16 @@ hl.on("hyprland.start", function()
 	-- These have no [Install] section, so they must be started on login instead of enabled.
 	hl.exec_cmd("systemctl --user start xdg-desktop-portal-hyprland.service xdg-desktop-portal-gtk.service")
 
-	-- Wallpaper daemon + wallust colors (Samael WallustColors reads ~/.config/waybar/wallust/colors-waybar.css)
+	-- Wallpaper daemon + wallust (palette CSS under ~/.config/waybar/wallust/ — kept for wallust; bar is Quickshell)
 	hl.exec_cmd("awww-daemon --format xrgb")
 	hl.exec_cmd(HOME .. "/.config/hypr/scripts/WallustSwww.sh")
 	hl.exec_cmd("qs -c samaelv2 &")
 
 	-- Rainbow borders (multi-color active border + manual angle animation).
 	-- Must run after WallustSwww.sh because wallust can set solid borders via the hyprland color template.
-	-- The script sets the gradient and starts the background loop for the spinning effect.
-	hl.exec_cmd("sleep 2 && " .. HOME .. "/.config/hypr/UserScripts/RainbowBorders.sh &")
-
-	-- Start Quickshell after wallust colors file is ready (same gate Waybar used to use).
-
-	-- Waylandar calendar (second Quickshell instance; does not use qs -c samael)
-	-- hl.exec_cmd("sleep 3 && waylandar-widget &")
+	-- Re-enable together with borderangle animation in hyprland/general.lua.
+	-- DISABLED (2026-07-13): ~8-12% CPU due to hyprctl eval loop at ~25Hz. Uncomment on stronger hardware:
+	-- hl.exec_cmd("sleep 2 && " .. HOME .. "/.config/hypr/scripts/RainbowBorders.sh &")
 
 	-- Audio
 	hl.exec_cmd("easyeffects --hide-window --service-mode")
@@ -54,7 +49,6 @@ hl.on("hyprland.start", function()
 
 	-- Scripts
 	hl.exec_cmd("env -u LUA_PATH -u LUA_CPATH bash -c '$HOME/.config/hypr/scripts/Polkit.sh'")
-	hl.exec_cmd(HOME .. "/.config/hypr/initial-boot.sh")
 
 	-- Custom
 	hl.exec_cmd("fcitx5 -d")

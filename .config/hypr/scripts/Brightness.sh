@@ -4,7 +4,12 @@
 
 iDIR="$HOME/.config/swaync/icons"
 notification_timeout=1000
-step=10  # INCREASE/DECREASE BY THIS VALUE
+step=5  # INCREASE/DECREASE BY THIS VALUE
+
+samaelv2_bar_osd_brightness() {
+    local pct="${1:-$(get_brightness)}"
+    qs -c samaelv2 ipc call samaelv2 osdBrightness "$pct" 2>/dev/null || true
+}
 
 # Get current brightness as an integer (without %)
 get_brightness() {
@@ -48,8 +53,12 @@ change_brightness() {
 
     brightnessctl set "${new}%"
 
-    icon=$(get_icon_path "$new")
-    send_notification "$new" "$icon"
+    if pgrep -f '[q]s -c samaelv2' >/dev/null 2>&1; then
+        samaelv2_bar_osd_brightness "$new"
+    else
+        icon=$(get_icon_path "$new")
+        send_notification "$new" "$icon"
+    fi
 }
 
 # Main
