@@ -25,3 +25,4 @@ singleton LockService LockService.qml
 singleton PowerSession PowerSession.qml
 singleton KeybindCatalog KeybindCatalog.qml
 singleton AudioRouteService AudioRouteService.qml
+singleton RecordService RecordService.qml

@@ -87,6 +87,7 @@ ColumnLayout {
             : root.pageId === "surfaces" ? surfacesComp
             : root.pageId === "lyrics" ? lyricsComp
             : root.pageId === "wallpaper" ? wallpaperComp
+            : root.pageId === "videos" ? videosComp
             : root.pageId === "audio" ? audioComp
             : root.pageId === "keybinds" ? keybindsComp
             : generalComp
@@ -288,6 +289,49 @@ ColumnLayout {
     }
 
     Component {
+        id: videosComp
+        ColumnLayout {
+            width: root.width
+            spacing: 2
+            SettingsSectionHeader { first: true; text: "SCREEN RECORD" }
+            Text {
+                Layout.fillWidth: true
+                Layout.bottomMargin: 4
+                text: "Tab complete · ↑↓ pick · Esc back · s save when not editing · ~ for home"
+                wrapMode: Text.WordWrap
+                color: WallustColors.moduleText
+                opacity: 0.38
+                font.family: Style.fontFamily
+                font.pixelSize: Style.fontPixelSize - 3
+            }
+            SettingsPathFieldRow {
+                first: true
+                last: false
+                label: "Save folder"
+                placeholder: "~/Videos"
+                pathKey: ["record", "saveDir"]
+                defaultValue: "~/Videos"
+            }
+            SettingsToggleRow {
+                first: false
+                last: false
+                label: "Include system audio"
+                subtext: "Default sink when recording starts"
+                checked: ShellConfigService.getDraftPath(["record", "includeSystemAudio"], true) !== false
+                onToggled: v => ShellConfigService.setDraftPath(["record", "includeSystemAudio"], v)
+            }
+            SettingsToggleRow {
+                first: false
+                last: true
+                label: "Include microphone"
+                subtext: "Default mic when recording starts"
+                checked: ShellConfigService.getDraftPath(["record", "includeMic"], false) === true
+                onToggled: v => ShellConfigService.setDraftPath(["record", "includeMic"], v)
+            }
+        }
+    }
+
+    Component {
         id: wallpaperComp
         ColumnLayout {
             width: root.width
@@ -295,11 +339,13 @@ ColumnLayout {
             SettingsSectionHeader { first: true; text: "WALLPAPER" }
             SettingsConnectedRow {
                 first: true; last: true
-                implicitHeight: wField.implicitHeight + 20
+                implicitHeight: wCol.implicitHeight + 14
                 ColumnLayout {
+                    id: wCol
                     width: parent.width
-                    spacing: 4
+                    spacing: 6
                     Text {
+                        Layout.fillWidth: true
                         text: "Wallpaper folder"
                         color: WallustColors.moduleText
                         opacity: 0.55
@@ -445,7 +491,7 @@ ColumnLayout {
                         id: refNote
                         width: parent.width
                         wrapMode: Text.WordWrap
-                        text: "From hyprland/keybinds.lua + samaelv2 surfaces. Read-only. Surfaces: l/Enter for inside keys."
+                        text: "Hypr keybinds.lua + samaelv2 pill keys (read-only). Open Surfaces → l/Enter for keys inside each menu."
                         color: WallustColors.moduleText
                         opacity: 0.6
                         font.family: Style.fontFamily

@@ -18,12 +18,21 @@ Item {
     readonly property int chromeRadius: ShellConfig.cornerRadius
 
     readonly property bool surfaceOpen: surface.length > 0
-    readonly property string mode: "rest"
+    readonly property bool recordVisible: surfaceOpen && surface === "record"
+    readonly property string mode: recordVisible ? "record" : "rest"
 
     readonly property real restInnerW: Math.max(restHost.implicitWidth, 48)
     readonly property real restInnerH: Math.max(restHost.implicitHeight, Style.barContentHeight)
 
-    readonly property size targetInner: Qt.size(restInnerW, restInnerH)
+    readonly property size targetInner: {
+        if (mode === "rest")
+            return Qt.size(restInnerW, restInnerH)
+        const sz = ShellConfig.leftSurfaceSize(mode)
+        const ld = ldRecord.item
+        if (ld && ld.implicitHeight > 0)
+            return Qt.size(Math.max(sz.width, ld.implicitWidth), Math.max(sz.height, ld.implicitHeight))
+        return Qt.size(sz.width, sz.height)
+    }
 
     readonly property real targetW: targetInner.width + padH * 2
     readonly property real targetH: targetInner.height + padTop + padInnerBottom + chromeGap
@@ -96,9 +105,27 @@ Item {
             barScreen: pill.barScreen
             spacing: 6
             anchors.centerIn: parent
-            opacity: Math.pow(morphCloseness, 1.5)
+            opacity: pill.recordVisible ? 0 : Math.pow(morphCloseness, 1.5)
             visible: opacity > 0.02
-            enabled: true
+            enabled: mode === "rest"
+        }
+
+        Loader {
+            id: ldRecord
+            anchors.fill: parent
+            active: pill.recordVisible
+            source: "../surfaces/RecordSurface.qml"
+            onLoaded: bindRecord(item)
+            onActiveChanged: if (active && item) bindRecord(item)
+
+            function bindRecord(rItem) {
+                if (!rItem)
+                    return
+                rItem.open = Qt.binding(() => pill.recordVisible)
+                rItem.morphCloseness = Qt.binding(() => pill.morphCloseness)
+                if (pill.recordVisible)
+                    Qt.callLater(() => rItem.forceActiveFocus())
+            }
         }
     }
 }

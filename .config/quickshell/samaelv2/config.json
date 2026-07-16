@@ -8,6 +8,7 @@
     "marginLeft": 12,
     "marginRight": 12,
     "left": [
+      "record",
       "workspaces"
     ],
     "middle": [
@@ -20,15 +21,22 @@
       "separator",
       "cava",
       "media",
-      "separator",
-      "power"
+      "separator"
     ]
+  },
+  "record": {
+    "saveDir": "~/Pictures/Videos",
+    "includeSystemAudio": true,
+    "includeMic": false,
+    "mode": "monitor",
+    "monitor": "eDP-1",
+    "windowAddress": ""
   },
   "left": {
     "surfaces": {
-      "notifications": {
-        "width": 360,
-        "height": 280
+      "record": {
+        "width": 380,
+        "height": 200
       }
     }
   },

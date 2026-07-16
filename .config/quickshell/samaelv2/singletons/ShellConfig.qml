@@ -35,6 +35,18 @@ Item {
     readonly property var middleSurfaces: _cfg.middle?.surfaces ?? ({})
     readonly property var leftSurfaces: _cfg.left?.surfaces ?? ({})
     readonly property var rightSurfaces: _cfg.right?.surfaces ?? ({})
+    readonly property string recordSaveDir: {
+        const d = _cfg.record?.saveDir
+        if (!d || !String(d).length)
+            return (Quickshell.env("HOME") || "") + "/Videos"
+        const home = Quickshell.env("HOME") || ""
+        const s = String(d)
+        if (s === "~")
+            return home
+        if (s.startsWith("~/"))
+            return home + s.slice(1)
+        return s
+    }
         readonly property string wallpaperDir: _cfg.wallpaper?.dir ?? ((Quickshell.env("HOME") || "") + "/Pictures/wallpapers")
         /** Empty = Caelestia default (~/Music/Lyrics). Set in config.json lyrics.dir */
         readonly property string lyricsDir: _cfg.lyrics?.dir ?? ""
@@ -105,7 +117,15 @@ Item {
                 middle: ["ai", "separator", "clock"],
                 right: ["notifications", "separator", "cava", "media"]
             },
-            left: { surfaces: { notifications: { width: 360, height: 280 } } },
+            record: {
+                saveDir: "~/Videos",
+                includeSystemAudio: true,
+                includeMic: false,
+                mode: "monitor",
+                monitor: "",
+                windowAddress: ""
+            },
+            left: { surfaces: { record: { width: 380, height: 200 } } },
             right: { surfaces: { power: { width: 72, height: 232 } } },
                 middle: {
                     restHeight: 30,

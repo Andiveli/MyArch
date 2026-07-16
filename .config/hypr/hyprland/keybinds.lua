@@ -5,9 +5,17 @@ local qsScripts = HOME .. "/.config/quickshell/$qsConfig/scripts"
 local qsIpcCall = "qs -c $qsConfig ipc call"
 local scriptsDir = HOME .. "/.config/hypr/scripts"
 
--- Super alone → launcher drawer (qs -c samael; global appid samael)
-hl.bind("SUPER + SUPER_L", hl.dsp.global("samael:launcher"), { description = "Samael launcher", release = true })
-hl.bind("SUPER + SUPER_R", hl.dsp.global("samael:launcher"), { description = "Samael launcher", release = true })
+-- Super alone → samaelv2 launcher (IPC; same as `qs -c samaelv2 ipc call samaelv2 toggleLauncher`)
+hl.bind(
+	"SUPER + SUPER_L",
+	hl.dsp.exec_cmd("qs -c samaelv2 ipc call samaelv2 toggleLauncher"),
+	{ description = "samaelv2 launcher", release = true }
+)
+hl.bind(
+	"SUPER + SUPER_R",
+	hl.dsp.exec_cmd("qs -c samaelv2 ipc call samaelv2 toggleLauncher"),
+	{ description = "samaelv2 launcher", release = true }
+)
 
 hl.bind("SUPER + E", hl.dsp.exec_cmd("microsoft-edge-stable"), { description = "Open Edge browser" })
 hl.bind("SUPER + Z", hl.dsp.exec_cmd(browser), { description = "Open Zen browser" })
@@ -27,7 +35,6 @@ hl.bind("SUPER + CTRL + F", hl.dsp.exec_cmd("hyprctl dispatch fullscreen 1"), { 
 hl.bind("SUPER + Space", hl.dsp.exec_cmd("hyprctl dispatch togglefloating"), { description = "Float current window" }) -- Arreglar --
 hl.bind("SUPER + o", hl.dsp.exec_cmd("pypr toggle ollama"), { description = "Ollama side panel" })
 
-hl.bind("SUPER + ALT + B", hl.dsp.exec_cmd(scriptsDir .. "/WaybarLayout.sh"), { description = "waybar layout menu" }) --Arreglar --
 hl.bind("SUPER + N", hl.dsp.exec_cmd(scriptsDir .. "/Hyprsunset.sh toggle"), { description = "toggle night light" })
 
 --##!!! qs call
@@ -47,17 +54,22 @@ hl.bind(
 	hl.dsp.global("quickshell:samaelNotificationsMenuToggle"),
 	{ description = "Notifications menu (Samael)" }
 )
+hl.bind(
+	"SUPER + SHIFT + A",
+	hl.dsp.global("quickshell:samaelUsageMenuToggle"),
+	{ description = "Usage / CodexBar menu (samaelv2)" }
+)
 hl.bind("SUPER + CTRL + B", hl.dsp.global("quickshell:samaelBarNavToggle"), { description = "Samael bar keyboard nav" })
 hl.bind("CTRL + ALT + W", hl.dsp.global("quickshell:wallpaperSelectorRandom"), { description = "random wallpaper" })
-hl.bind(
-	"SUPER + CTRL + O",
-	hl.dsp.global("quickshell:samaelSystemSidebarToggle"),
-	{ description = "Samael system monitor sidebar (qs -c samael)" }
-)
 hl.bind(
 	"SUPER + SHIFT + O",
 	hl.dsp.global("quickshell:samaelOverviewToggle"),
 	{ description = "System overview (samaelv2 right pill)" }
+)
+hl.bind(
+	"SUPER + SHIFT + P",
+	hl.dsp.global("quickshell:samaelPowerMenuToggle"),
+	{ description = "Power menu (samaelv2 right pill)" }
 )
 -- Media: quickshell global (Samael or samaelv2 — whichever `qs -c …` is running registers it)
 hl.bind(
@@ -75,7 +87,11 @@ hl.bind(
 	hl.dsp.global("quickshell:samaelPerformanceDropToggle"),
 	{ description = "Samael performance drop (system monitor)" }
 )
-hl.bind("CTRL + ALT + L", hl.dsp.global("samael:lock"), { description = "lock screen (qs -c samael)" })
+hl.bind(
+	"CTRL + ALT + L",
+	hl.dsp.exec_cmd(HOME .. "/.config/quickshell/samaelv2/scripts/LockScreen.sh"),
+	{ description = "lock screen (samaelv2 WlSessionLock)" }
+)
 
 --##!!! System
 hl.bind("CTRL + ALT + Delete", hl.dsp.exec_cmd("hyprctl dispatch exit 0"), { description = "exit Hyprland" })
@@ -197,16 +213,15 @@ hl.bind(
 hl.bind("XF86AudioStop", hl.dsp.exec_cmd(scriptsDir .. "/MediaCtrl.sh --stop"), { locked = true, description = "stop" })
 hl.bind("ALT + XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ toggle"), { locked = true })
 
---##!!! Brightness (lua non-conflicting)
--- brightnessctl always runs; QS ipc optional (was broken: IpcHandler had invalid syntax + exit 0 hid || fallback)
+--##!!! Brightness — Brightness.sh → samaelv2 osdBrightness IPC
 hl.bind(
 	"XF86MonBrightnessUp",
-	hl.dsp.exec_cmd("sh -c '" .. qsIpcCall .. " brightness increment >/dev/null 2>&1; brightnessctl s 5%+'"),
+	hl.dsp.exec_cmd(scriptsDir .. "/Brightness.sh --inc"),
 	{ locked = true, repeating = true }
 )
 hl.bind(
 	"XF86MonBrightnessDown",
-	hl.dsp.exec_cmd("sh -c '" .. qsIpcCall .. " brightness decrement >/dev/null 2>&1; brightnessctl s 5%-'"),
+	hl.dsp.exec_cmd(scriptsDir .. "/Brightness.sh --dec"),
 	{ locked = true, repeating = true }
 )
 
@@ -217,11 +232,23 @@ hl.bind(
 	{ description = "Utilities: Pick color #RRGGBB >> clipboard" }
 )
 
-hl.bind("SUPER + SHIFT + R", hl.dsp.global("quickshell:regionRecord"), { locked = true }) -- Arreglar --
-hl.bind("CTRL + ALT + R", hl.dsp.exec_cmd(qsScripts .. "/videos/record.sh --fullscreen"), { locked = true }) -- Arreglar --
+hl.bind(
+	"SUPER + CTRL + R",
+	hl.dsp.global("quickshell:samaelRecordMenuToggle"),
+	{ description = "Screen record (samaelv2 left pill)" }
+)
 
--- Waylandar full-month overlay (Super+C is code editor)
-hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("waylandar-dashboard"), { description = "Calendar: Waylandar dashboard" }) -- Configurar con wallust
+hl.bind(
+	"SUPER + CTRL + S",
+	hl.dsp.global("quickshell:samaelSettingsMenuToggle"),
+	{ description = "Settings (samaelv2 middle pill)" }
+)
+
+hl.bind(
+	"SUPER + SHIFT + D",
+	hl.dsp.global("quickshell:samaelCalendarMenuToggle"),
+	{ description = "Calendar (samaelv2 middle pill)" }
+)
 
 --##!!! Samael bar navigation (plain h/l/j/k while submap active)
 hl.define_submap("samael-bar-nav", function()

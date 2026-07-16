@@ -6,6 +6,18 @@ Run:
 qs -c samaelv2
 ```
 
+## Immutable constraints (Engram)
+
+Product non-negotiables and the idle-performance checklist are stored in **Engram** (project `samaelv2`). Check there before changing architecture, polls, or bar/cava behavior.
+
+| Ref | Topic key | What |
+|-----|-----------|------|
+| **#1331** | `architecture/quickshell-immutable-constraints` | Performance/idle near-zero, keyboard-first, Apple-like motion, pill reference; JSON for visibility/modules, **not** keybinds |
+| **#1362** | `architecture/performance-idle-checklist` | Operational rules (e.g. **cava subprocess only while MPRIS `Playing`**; heavy loaders only when surfaces open) |
+| **#1332** | `architecture/top-bar-ui` | Three-zone bar (left workspaces, right cava\|mpris, middle pill) |
+
+Retrieve: Engram `mem_get_observation` on those ids, or search `inmutables` / `1331` in project `samaelv2`.
+
 ## JSON config (`config.json`)
 
 - **`bar.enabled`**: show top bar (`false` = no panels, no widgets, no cava process, no wallust poll).

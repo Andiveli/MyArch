@@ -63,6 +63,17 @@ FocusScope {
         if (!open)
             return
         const t = event.text
+        if (pageHost.anyPathFieldFocused && pageHost.anyPathFieldFocused()) {
+            if (event.key === Qt.Key_Escape) {
+                pageHost.blurActivePathField()
+                forceActiveFocus()
+                event.accepted = true
+                return
+            }
+            // Let TextField receive all other keys (e.g. "s" in path names).
+            event.accepted = false
+            return
+        }
         if (event.key === Qt.Key_Escape) {
             if (focusBand === 1 && pageHost.pagesHostPages) {
                 if (pageHost.pagesHostPages.clearAudioOutputPicker
@@ -182,6 +193,11 @@ FocusScope {
                 return
             }
             if (t === "l" || event.key === Qt.Key_Right || event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                if (rowItem && rowItem.settingsPathFieldRow === true && typeof rowItem.focusPathField === "function") {
+                    rowItem.focusPathField()
+                    event.accepted = true
+                    return
+                }
                 if (rowItem && rowItem.audioStreamRow === true && typeof rowItem.bump === "function") {
                     rowItem.bump(1)
                     event.accepted = true
@@ -203,6 +219,11 @@ FocusScope {
                 return
             }
             if (event.key === Qt.Key_Space) {
+                if (rowItem && rowItem.settingsPathFieldRow === true && typeof rowItem.focusPathField === "function") {
+                    rowItem.focusPathField()
+                    event.accepted = true
+                    return
+                }
                 if (rowItem && rowItem.audioStreamRow === true && typeof rowItem.audioPlayToggle === "function") {
                     rowItem.audioPlayToggle()
                     event.accepted = true
@@ -468,6 +489,24 @@ FocusScope {
 
                         function refreshFlickableHeight() {
                             contentFlick.contentHeight = Math.max(contentFlick.height, pageHost.implicitHeight + 16)
+                        }
+
+                        function anyPathFieldFocused() {
+                            for (let i = 0; i < _rowItems.length; i++) {
+                                const r = _rowItems[i]
+                                if (r && r.settingsPathFieldRow === true && r.pathFieldActive === true)
+                                    return true
+                            }
+                            return false
+                        }
+
+                        function blurActivePathField() {
+                            for (let i = 0; i < _rowItems.length; i++) {
+                                const r = _rowItems[i]
+                                if (r && r.settingsPathFieldRow === true && r.pathFieldActive === true
+                                        && typeof r.blurPathField === "function")
+                                    r.blurPathField()
+                            }
                         }
 
                         function syncContentFocus() {

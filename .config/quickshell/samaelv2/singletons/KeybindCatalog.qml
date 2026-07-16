@@ -26,6 +26,7 @@ Singleton {
     /** Hypr → open samaelv2 pill (drillId = inside section id). */
     readonly property var surfaceOpenRows: [
         { keys: "Super (release)", action: "Launcher", drillId: "surface_launcher" },
+        { keys: "Super + Ctrl + R", action: "Screen record (left pill)", drillId: "surface_record" },
         { keys: "Super + W", action: "Wallpaper picker", drillId: "surface_wallpaper" },
         { keys: "Super + Shift + N", action: "Notifications", drillId: "surface_notifications" },
         { keys: "Super + Shift + W", action: "Wi‑Fi", drillId: "surface_wifi" },
@@ -44,15 +45,25 @@ Singleton {
         { keys: "Super + Print", action: "Screenshot now" },
         { keys: "Super + N", action: "Toggle night light (Hyprsunset)" },
         { keys: "Ctrl + Alt + W", action: "Random wallpaper (Quickshell)" },
-        { keys: "Super + Ctrl + B", action: "Samael bar keyboard nav submap" },
+        { keys: "Super + Ctrl + B", action: "Bar keyboard nav submap (then h/l/j/k · Esc)" },
         { keys: "Super + Shift + M", action: "Samael super menu" },
         { keys: "Super + Alt + R", action: "Refresh bar / menus" },
         { keys: "XF86Audio* / brightness", action: "Volume / brightness scripts → OSD IPC" },
-        { keys: "Bar click", action: "Widgets toggle matching surface" }
+        { keys: "Bar click", action: "Widgets toggle matching surface (Wi‑Fi, media, overview, …)" },
+        { keys: "Bar · notifications · Left click", action: "Dismiss latest toast, or open notifications menu" },
+        { keys: "Bar · notifications · Right click", action: "Toggle do-not-disturb (hides toasts; badge off)" }
     ]
 
     function insideEntries(drillId) {
         const map = {
+        "surface_record": [
+            { keys: "h / l", action: "Controls row: left/right · Mic/system row: volume ±5%" },
+            { keys: "Space", action: "Toggle mute (mic or system row)" },
+            { keys: "j / k", action: "Next / previous row (controls, mic, system)" },
+            { keys: "Enter", action: "Activate (Enter on volume bar: adjust with h/l)" },
+            { keys: "Esc", action: "Leave config panel, then close surface" },
+            { keys: "Bar · record icon", action: "Open record surface (left)" }
+        ],
         "surface_launcher": [
             { keys: "/", action: "Focus search" },
             { keys: "j / k", action: "Move selection" },
@@ -70,13 +81,13 @@ Singleton {
             { keys: "Esc", action: "Close surface" }
         ],
         "surface_notifications": [
-            { keys: "j / k", action: "Next / previous group or item" },
-            { keys: "h", action: "Collapse group / previous group" },
-            { keys: "l / Enter / o", action: "Expand or activate notification" },
-            { keys: "x", action: "Dismiss focused" },
-            { keys: "Shift+X", action: "Dismiss whole group" },
-            { keys: "d", action: "Dismiss all tracked" },
-            { keys: "Esc", action: "Close surface" }
+            { keys: "j / k", action: "Next / previous group (collapsed) or item (expanded)" },
+            { keys: "h", action: "Collapse expanded group, or previous group" },
+            { keys: "l / Enter / o", action: "Expand group, or activate focused notification" },
+            { keys: "x", action: "Dismiss focused notification (expanded, 2+ in group) or whole group otherwise" },
+            { keys: "Shift+X", action: "Dismiss entire group at focus" },
+            { keys: "d", action: "Dismiss all tracked notifications" },
+            { keys: "Esc", action: "Close notifications menu" }
         ],
         "surface_wifi": [
             { keys: "j / k", action: "Move network row" },

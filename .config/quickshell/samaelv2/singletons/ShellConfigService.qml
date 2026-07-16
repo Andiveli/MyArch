@@ -27,6 +27,7 @@ Singleton {
         { id: "surfaces", label: "Surfaces", icon: "\uf2d2", description: "Panel sizes" },
         { id: "lyrics", label: "Lyrics", icon: "\uf001", description: "Dir, backend, offset" },
         { id: "wallpaper", label: "Wallpaper", icon: "\uf03e", description: "Image folder" },
+        { id: "videos", label: "Videos", icon: "\uf03d", description: "Screen record save folder" },
         { id: "audio", label: "Audio", icon: "\uf028", description: "Session mixer" },
         { id: "keybinds", label: "Keybinds", icon: "\uf11c", description: "Shortcuts reference (read-only)" }
     ]

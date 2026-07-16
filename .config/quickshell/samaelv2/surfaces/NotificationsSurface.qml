@@ -76,14 +76,20 @@ FocusScope {
         return g.notifications[itemIndex] || g.notifications[0]
     }
 
-    function dismissFocused() {
-        const n = focusedNotif()
-        if (n)
-            NotifsService.dismissNotif(n)
-        else {
-            const g = currentGroup()
-            if (g && g.notifications.length === 1)
-                NotifsService.dismissNotif(g.notifications[0])
+    /** x — one notification when group expanded with 2+ items; else whole focused group. */
+    function dismissAtFocus() {
+        const g = currentGroup()
+        if (!g)
+            return
+        if (expandedKey === g.key && g.notifications.length > 1) {
+            const n = focusedNotif()
+            if (n)
+                NotifsService.dismissNotif(n)
+        } else {
+            for (let i = 0; i < g.notifications.length; i++)
+                NotifsService.dismissNotif(g.notifications[i])
+            if (expandedKey === g.key)
+                expandedKey = ""
         }
         clampIndices()
     }
@@ -178,13 +184,11 @@ FocusScope {
             event.accepted = true
             return
         }
-        if (t === "x") {
-            dismissFocused()
-            event.accepted = true
-            return
-        }
-        if (t === "X") {
-            dismissGroup()
+        if (t === "x" || event.key === Qt.Key_X) {
+            if (event.modifiers & Qt.ShiftModifier)
+                dismissGroup()
+            else
+                dismissAtFocus()
             event.accepted = true
             return
         }
@@ -193,6 +197,7 @@ FocusScope {
             expandedKey = ""
             clampIndices()
             event.accepted = true
+            return
         }
     }
 
@@ -233,7 +238,7 @@ FocusScope {
             Item { Layout.fillWidth: true }
 
             Text {
-                text: "j/k · l/o · x · Esc"
+                text: "j/k · l/o · x · Shift+x · d · Esc"
                 color: WallustColors.moduleText
                 opacity: 0.4
                 font.family: Style.fontFamily

@@ -29,6 +29,8 @@ ShellRoot {
         ShellActions.toggleSettings = () => root.toggleSurface("", "settings")
         ShellActions.closeMiddleSurface = () => root.closeMiddleOnly()
         ShellActions.closeRightSurface = () => root.closeRightOnly()
+        ShellActions.closeLeftSurface = () => root.closeLeftOnly()
+        ShellActions.toggleRecord = () => root.toggleLeftSurface("", "record")
     }
 
     property string openMon: ""
@@ -38,17 +40,48 @@ ShellRoot {
     property string openRightMon: ""
     property string openRightSurface: ""
     property string hyprFocusBeforePill: ""
+    property int hyprWorkspaceBeforePill: -1
 
+    function _toplevelWorkspaceId(top) {
+        const ipc = top?.lastIpcObject
+        if (!ipc)
+            return -1
+        if (ipc.workspace !== undefined && ipc.workspace !== null) {
+            if (typeof ipc.workspace === "object" && ipc.workspace.id !== undefined)
+                return ipc.workspace.id
+            if (typeof ipc.workspace === "number")
+                return ipc.workspace
+        }
+        if (ipc.workspaceId !== undefined)
+            return ipc.workspaceId
+        return -1
+    }
+
+    /** Only restore a client that was focused on the *current* workspace when the pill opened. */
     function captureHyprClientFocus() {
-        const addr = Hyprland.activeToplevel?.lastIpcObject?.address
-        if (addr)
+        const mon = Hyprland.focusedMonitor
+        const wsId = mon?.activeWorkspace?.id ?? -1
+        root.hyprWorkspaceBeforePill = wsId
+        root.hyprFocusBeforePill = ""
+        const top = Hyprland.activeToplevel
+        const addr = top?.lastIpcObject?.address
+        if (!addr)
+            return
+        const topWs = root._toplevelWorkspaceId(top)
+        if (topWs < 0 || topWs === wsId)
             root.hyprFocusBeforePill = String(addr)
     }
 
     function restoreHyprClientFocus() {
         const addr = root.hyprFocusBeforePill
+        const wsBefore = root.hyprWorkspaceBeforePill
         root.hyprFocusBeforePill = ""
-        if (addr.length === 0)
+        root.hyprWorkspaceBeforePill = -1
+        if (!addr || addr.length === 0)
+            return
+        const mon = Hyprland.focusedMonitor
+        const wsNow = mon?.activeWorkspace?.id ?? -1
+        if (wsBefore >= 0 && wsNow >= 0 && wsBefore !== wsNow)
             return
         const cmd = `hl.dsp.focus({ window = "address:${addr}" })`
         Hyprland.dispatch(cmd)
@@ -97,6 +130,13 @@ Qt.callLater(root.restoreHyprClientFocus)
         root.openRightSurface = ""
         if (!root.openSurface.length && !root.openLeftSurface.length)
 Qt.callLater(root.restoreHyprClientFocus)
+    }
+
+    function closeLeftOnly() {
+        root.openLeftMon = ""
+        root.openLeftSurface = ""
+        if (!root.openSurface.length && !root.openRightSurface.length)
+            Qt.callLater(root.restoreHyprClientFocus)
     }
 
     function close() {
@@ -209,6 +249,12 @@ return
         name: "samaelv2Lock"
         description: "samaelv2 session lock"
         onPressed: sessionLockHost.requestLock()
+    }
+
+    GlobalShortcut {
+        name: "samaelRecordMenuToggle"
+        description: "samaelv2 record surface (left pill) — Hypr SUPER+CTRL+R"
+        onPressed: root.toggleLeftSurface("", "record")
     }
 
     Process { id: randomWallProc }
@@ -377,6 +423,8 @@ return
                         // Wallpaper picker owns Esc (field → strip → clear → close)
                         if (overlay.surface === "wallpaper" || overlay.surface === "notifications" || overlay.surface === "wifi" || overlay.surface === "bluetooth" || overlay.surface === "usage")
                             return
+                        if (root.openLeftSurface === "record")
+                            return
                         root.close()
                         event.accepted = true
                     }
@@ -390,15 +438,22 @@ return
                     Style.chromeBandHeight + ShellConfig.sectionBottomMargin)
                 readonly property real leftRestSlotH: Math.max(ShellActions.leftRestHeight,
                     Style.chromeBandHeight + ShellConfig.sectionBottomMargin)
+                /** Rest pills are vertically centered in the bar strip; surfaces that grow taller keep the same bottom edge so the popup grows downward instead of off the top of the screen. */
+                readonly property real middleRestY: ShellConfig.barMarginTop
+                        + (barStripHeight - middleRestSlotH) / 2
+                readonly property real middleAnchorBottom: middleRestY + middleRestSlotH
                 readonly property real middleY: {
                         if (overlay.surface === "wallpaper")
                             return ShellConfig.barMarginTop
-                        return ShellConfig.barMarginTop
-                            + (barStripHeight - middleRestSlotH) / 2
+                        return Math.max(ShellConfig.barMarginTop,
+                            middleAnchorBottom - middlePill.height)
                     }
+                    /** Toast/OSD: top stays in the bar strip so the pill grows downward. Overview/power pin to marginTop. */
+                    readonly property real rightRestY: ShellConfig.barMarginTop
+                            + (barStripHeight - rightRestSlotH) / 2
                     readonly property real rightY: (rightPill.overviewVisible || rightPill.powerVisible)
                                 ? ShellConfig.barMarginTop
-                                : ShellConfig.barMarginTop + (barStripHeight - rightRestSlotH) / 2
+                                : rightRestY
                     readonly property real leftY: ShellConfig.barMarginTop
                             + (barStripHeight - leftRestSlotH) / 2
 
