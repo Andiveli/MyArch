@@ -18,3 +18,4 @@ OverviewProcsPanel 1.0 OverviewProcsPanel.qml
 OverviewProcColumn 1.0 OverviewProcColumn.qml
 OverviewTrafficBar 1.0 OverviewTrafficBar.qml
 RecordVolumeStrip 1.0 RecordVolumeStrip.qml
+ProviderBrandIcon 1.0 ProviderBrandIcon.qml

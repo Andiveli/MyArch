@@ -2,50 +2,51 @@
 
 samaelv2 middle pill **AI** chip → `UsageSurface` runs `codexbar usage --format json` (see `CodexBarService.qml`).
 
-## Providers: Codex + OpenAI
+## Setup: Codex + Grok (subscriptions)
 
-Config file (CodexBar): `~/.config/codexbar/config.json`
+Config file: `~/.config/codexbar/config.json`
 
-### Enable both (CLI)
+Only enable what you use — the Usage pill lists **enabled** providers only.
 
 ```bash
 codexbar config enable --provider codex
-codexbar config enable --provider openai
-codexbar config providers | grep -E 'codex|openai'
+codexbar config enable --provider grok
+codexbar config disable --provider openai   # unless you use API billing separately
+codexbar config providers | grep -E 'codex|grok|openai'
+codexbar usage --format json --pretty       # should show codex + grok only
 ```
 
-### Codex (OpenAI subscription / Plus)
+### Codex (ChatGPT / Codex subscription)
 
-- Uses **OAuth / web dashboard** (Codex CLI cookies when needed).
-- No API key in config for the default Codex provider.
-- Check: `codexbar usage --format json --provider codex --pretty`
+- OAuth / web dashboard (Codex CLI session when cookies needed).
+- No OpenAI **API** key required for this provider id.
 
-### OpenAI (API usage)
+### Grok (xAI subscription)
 
-OpenAI provider needs an **API key** stored in CodexBar config:
+- Enable provider; sign in via CodexBar / provider flow as usual.
 
-```bash
-# Option A — env var (do not commit)
-printf '%s' "$OPENAI_API_KEY" | codexbar config set-api-key --provider openai --stdin
+### OpenAI provider id
 
-# Option B — paste once (interactive)
-codexbar config set-api-key --provider openai --api-key 'sk-...'
-```
+`openai` in CodexBar is **API usage**, not your Codex subscription. Disable it if you only use **codex** + **grok**.
 
-Verify:
+### Shell
 
-```bash
-codexbar usage --format json --provider openai --pretty
-```
+Hypr: **Super+Shift+A** → `quickshell:samaelUsageToggle`.
 
-If you see `No available fetch strategy for openai`, the key is missing or invalid.
+In surface (keyboard-only):
 
-### Shell shortcut
+- **Tabs**: **h** / **l**, **Tab**, **k** (prev provider), **j** → action list
+- **Actions**: **j** / **k**, **Enter** or **l** run, **h** → tabs, **r** refresh anytime, **Esc** (back / close)
 
-Hypr: **Super+Shift+A** → `quickshell:samaelUsageToggle` (Usage / CodexBar menu).
+Provider icons from upstream [steipete/CodexBar](https://github.com/steipete/CodexBar) `Sources/CodexBar/Resources/ProviderIcon-*.svg`, vendored as **PNG** under `assets/codexbar/` (Quickshell `Image` is unreliable with local SVG). Re-rasterize after SVG updates: `rsvg-convert -w 96 -h 96 ProviderIcon-<id>.svg -o ProviderIcon-<id>.png`.
 
-Inside surface: **Tab** / **j** / **k** switch provider, **r** refresh, **Esc** close.
+## Usage UI (samaelv2)
 
-## Other providers
+The surface follows CodexBar's native menu hierarchy: compact provider tabs, selected-provider header, **Session / Weekly / other quota lanes**, Extra usage, Cost, dashboard/status actions, and account/source metadata.
 
-Same pattern: `codexbar config enable --provider grok` (etc.) and `set-api-key` where required.
+Linux provides two complementary CLI payloads:
+
+- `codexbar usage --format json` — quota windows, resets, identity, credits.
+- `codexbar cost --format json` — local Codex log scan with session/30-day USD estimates, tokens, cache/input/output totals, and top model.
+
+The dollar values are local token-cost estimates, not charges against the ChatGPT subscription invoice. macOS-only web/dashboard details remain unavailable until upstream exposes them through the Linux CLI.

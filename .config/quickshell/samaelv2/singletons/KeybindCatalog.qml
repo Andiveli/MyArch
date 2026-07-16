@@ -109,10 +109,14 @@ Singleton {
             { keys: "Esc", action: "Leave confirm, then close" }
         ],
         "surface_usage": [
-            { keys: "Tab / Shift+Tab", action: "Next / previous provider" },
-            { keys: "j / k", action: "Next / previous provider" },
-            { keys: "r", action: "Refresh" },
-            { keys: "Esc", action: "Close surface" }
+            { keys: "h / l / Tab", action: "Next / previous provider tab" },
+            { keys: "k", action: "Previous provider tab" },
+            { keys: "j / Enter", action: "Focus action list" },
+            { keys: "j / k (actions)", action: "Move between Dashboard, Refresh, Status" },
+            { keys: "Enter / l", action: "Run focused action" },
+            { keys: "h (actions)", action: "Back to provider tabs" },
+            { keys: "r", action: "Refresh usage data" },
+            { keys: "Esc", action: "Back from actions, then close" }
         ],
         "surface_calendar": [
             { keys: "Tab / Shift+Tab", action: "Next / previous month" },
